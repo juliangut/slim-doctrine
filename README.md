@@ -101,9 +101,9 @@ Doctrine is being configured ready for production and not for development, this 
 
 ## Contributing
 
-Found a bug or have a feature request? [Please open a new issue](issues). Have a look at existing issues before
+Found a bug or have a feature request? [Please open a new issue](https://github.com/juliangut/slim-doctrine/blob/master/issues). Have a look at existing issues before
 
-See file [CONTRIBUTING.md](CONTRIBUTING.md)
+See file [CONTRIBUTING.md](https://github.com/juliangut/slim-doctrine/blob/master/CONTRIBUTING.md)
 
 ### Contributors
 
@@ -115,5 +115,5 @@ See file [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### Release under BSD-3-Clause License.
 
-See file [LICENSE](LICENSE) included with the source code for a copy of the license terms
+See file [LICENSE](https://github.com/juliangut/slim-doctrine/blob/master/LICENSE) included with the source code for a copy of the license terms
 
