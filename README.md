@@ -88,16 +88,17 @@ $container['entityManager'] = function () use ($doctrineConfig) {
 * `yaml_paths` array of paths where to find YAML entity mapping files
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineProxies'
-* `auto_generate_proxies` boolean indicating whether Doctrine should auto-generate missing proxies, default is `false`
+* `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
 * `naming_strategy` \Doctrine\ORM\Mapping\NamingStrategy, defaults to `UnderscoreNamingStrategy`
+* `sql_logger` \Doctrine\DBAL\Logging\SQLLogger
 
 ### Considerations
 
-`connection` configuration is mandatory either as an array or as a proper Doctrine DBAL Connection
+`connection` configuration is mandatory either as a configurations array or as a proper Doctrine DBAL Connection
 
-One of `annotation_paths`, `xml_paths` or `yaml_paths` is needed by Doctrine to include a Metadata Driver
+One of `annotation_paths`, `xml_paths` or `yaml_paths` is needed by Doctrine to include a Metadata Driver, most common in annotation_paths
 
-Doctrine is being configured ready for production and not for development, this mainly meens proxies won't be automatically generated and, in case non `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache`
+Doctrine is being configured ready for production and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver, in the following order, depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
 
 ## Contributing
 

@@ -17,17 +17,13 @@ use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\ORM\Mapping\Driver\YamlDriver;
+use Doctrine\Common\Proxy\AbstractProxyFactory;
 
 /**
  * Doctrine Entity Manager service builder
  */
 class EntityManagerBuilder
 {
-    /**
-     * @var array
-     */
-    protected $options;
-
     /**
      * @param array $options
      * @throws \InvalidArgumentException
@@ -55,6 +51,8 @@ class EntityManagerBuilder
 
         self::setupProxy($config, $options);
 
+        self::setupSQLLogger($config, $options);
+
         return EntityManager::create(self::getOption($options, 'connection'), $config);
     }
 
@@ -65,8 +63,7 @@ class EntityManagerBuilder
      */
     protected static function setupNamingStrategy(Configuration &$config, array $options = [])
     {
-        $namingStrategy = self::getOption($options, 'naming_strategy');
-        $namingStrategy = $namingStrategy ?: new UnderscoreNamingStrategy();
+        $namingStrategy = self::getOption($options, 'naming_strategy') ?: new UnderscoreNamingStrategy();
         if (!$namingStrategy instanceof NamingStrategy) {
             throw new \InvalidArgumentException('Naming strategy provided is not valid');
         }
@@ -142,7 +139,23 @@ class EntityManagerBuilder
             $config->setProxyNamespace($proxiesNamespace);
         }
 
-        $config->setAutoGenerateProxyClasses((bool) self::getOption($options, 'auto_generate_proxies', false));
+        $config->setAutoGenerateProxyClasses(
+            intval(self::getOption($options, 'auto_generate_proxies', AbstractProxyFactory::AUTOGENERATE_NEVER))
+        );
+    }
+
+    /**
+     * Set up SQL logger
+     *
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array $options
+     */
+    protected static function setupSQLLogger(Configuration &$config, array $options = [])
+    {
+        $sqlLogger = self::getOption($options, 'sql_logger');
+        if ($sqlLogger) {
+            $config->setSQLLogger($sqlLogger);
+        }
     }
 
     /**
