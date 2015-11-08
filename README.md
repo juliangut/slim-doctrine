@@ -15,7 +15,7 @@ Doctrine handler service for Slim3.
 Best way to install is using [Composer](https://getcomposer.org/):
 
 ```
-php composer.phar require juliangut/slim-doctrine
+composer require juliangut/slim-doctrine
 ```
 
 Then require_once the autoload file:
@@ -29,50 +29,60 @@ require_once './vendor/autoload.php';
 Register in the DI container as any other service.
 
 ```php
-// Create Slim app
-$app = new \Slim\App();
+use Jgut\Slim\Doctrine\EntitytManagerBuilder;
+use Slim\App;
 
-// Fetch DI Container
+// Create Slim app and fetch DI Container
+$app = new App();
 $container = $app->getContainer();
 
 // Register Entity Manager in the container
-$container['entityManager'] = function ($container) {
-    $doctrineSettings = $container->get('settings')['doctrine'];
+$container['entityManager'] = function () {
+    $doctrineSettings = [
+        'connection' => [
+            'driver' => 'pdo_sqlite',
+            'memory' => true,
+        ],
+        'annotation_paths' => ['path_to_entities_files'],
+    ];
 
-    return \Jgut\Slim\Doctrine\EntitytManagerBuilder::build($doctrineSettings);
+    return EntitytManagerBuilder::build($doctrineSettings);
 };
 
-// Add routes
 $app->get('/', function () {
+    // Use entity manager
     $this->entityManager->beginTransaction();
     // Do your magic
     $this->entityManager->commit();
 });
-
-$app->run();
 ```
 
-### Configuration
+You can use Slim settings service to store Doctrine configurations.
 
 ```php
-// Minimun configuration
-$doctrineConfig = [
-    'connection' => [
-        'driver' => 'pdo_sqlite',
-        'memory' => true,
+use Jgut\Slim\Doctrine\EntitytManagerBuilder;
+use Interop\Container\ContainerInterface;
+use Slim\App;
+
+$settings = [
+    'settings' => [
+        'doctrine' => [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'annotation_paths' => ['path_to_entities_files'],
+        ],
     ],
-    'annotation_paths' => ['path_to_entities_files'],
 ];
 
-// Create Slim app
-$app = new \Slim\App();
-
-// Fetch DI Container
+// Create Slim app and fetch DI Container
+$app = new App($settings);
 $container = $app->getContainer();
 
 // Register Entity Manager in the container
-$container['entityManager'] = function () use ($doctrineConfig) {
-    return \Jgut\Slim\Doctrine\EntitytManagerBuilder::build($doctrineConfig);
+$container['entityManager'] = function (ContainerInterface $container) {
+    return EntitytManagerBuilder::build($container->get('settings')['doctrine']);
 };
 ```
 
@@ -95,9 +105,9 @@ $container['entityManager'] = function () use ($doctrineConfig) {
 
 `connection` configuration is mandatory either as an array or as a proper Doctrine DBAL Connection
 
-One of `annotation_paths`, `xml_paths` or `yaml_paths` is needed by Doctrine to include a Metadata Driver
+One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver
 
-Doctrine is being configured ready for production and not for development, this mainly meens proxies won't be automatically generated and, in case non `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache`
+Doctrine is being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache`
 
 ## Contributing
 
