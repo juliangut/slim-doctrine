@@ -9,6 +9,7 @@
 namespace Jgut\Slim\Doctrine\Tests;
 
 use Jgut\Slim\Doctrine\EntityManagerBuilder;
+use Doctrine\Common\Proxy\AbstractProxyFactory;
 
 /**
  * @covers Jgut\Slim\Doctrine\EntityManagerBuilder
@@ -79,6 +80,7 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupAnnotationMetadata
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupProxy
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupSQLLogger
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupMetadataDriver
      */
     public function testCreation()
@@ -90,7 +92,8 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
             ],
             'annotation_paths' => sys_get_temp_dir(),
             'proxies_namespace' => 'myNamespace\Proxies',
-            'auto_generate_proxies' => true,
+            'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_ALWAYS,
+            'sql_logger' => new \Doctrine\DBAL\Logging\EchoSQLLogger,
         ];
 
         $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
