@@ -62,12 +62,9 @@ tools:
   php_code_sniffer:
     enabled: true
     config:
-      standard:
-        - 'PSR2'
+      standard: 'PSR2'
     filter:
-      paths:
-        - src/
-        - tests/
+      paths: [src, tests]
   php_cpd:
     enabled: true
     excluded_dirs: [build, tests, vendor]
