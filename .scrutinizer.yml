@@ -65,7 +65,9 @@ tools:
       standard:
         - 'PSR2'
     filter:
-      paths: ['src', 'tests']
+      paths:
+        - src/
+        - tests/
   php_cpd:
     enabled: true
     excluded_dirs: [build, tests, vendor]
