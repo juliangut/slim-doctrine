@@ -9,49 +9,49 @@ module.exports = function(grunt) {
                 swapPath: '/tmp'
             },
             application: [
-                './src/**/*.php',
-                './tests/**/*.php'
+                'src/**/*.php',
+                'tests/**/*.php'
             ]
         },
         phpcs: {
             options: {
-                bin: './vendor/bin/phpcs',
-                standard: './phpcs.xml'
+                bin: 'vendor/bin/phpcs',
+                standard: 'PSR2'
             },
             application: {
                 dir: [
-                    './src',
-                    './tests'
+                    'src',
+                    'tests'
                 ]
             }
         },
         phpmd: {
             options: {
-                bin: './vendor/bin/phpmd',
-                rulesets: './phpmd.xml',
+                bin: 'vendor/bin/phpmd',
+                rulesets: 'phpmd.xml',
                 reportFormat: 'text'
             },
             application: {
-                dir: './src'
+                dir: 'src'
             }
         },
         phpcpd: {
             options: {
-                bin: './vendor/bin/phpcpd',
+                bin: 'vendor/bin/phpcpd',
                 quiet: false,
                 ignoreExitCode: true
             },
             application: {
-                dir: './src'
+                dir: 'src'
             }
         },
         phpunit: {
             options: {
-                bin: './vendor/bin/phpunit',
+                bin: 'vendor/bin/phpunit',
                 coverage: true
             },
             application: {
-                configuration: './phpunit.xml'
+                coverageHtml: 'build/coverage'
             }
         }
     });
