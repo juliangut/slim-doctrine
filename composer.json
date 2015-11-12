@@ -8,7 +8,6 @@
     "handler"
   ],
   "homepage": "http://github.com/juliangut/slim-doctrine",
-  "type": "library",
   "license": "BSD-3-Clause",
   "authors": [
     {
