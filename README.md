@@ -43,7 +43,7 @@ $container['entityManager'] = function () {
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ],
-        'annotation_paths' => ['path_to_entities_files'],
+        'annotation_paths' => 'path_to_entities_files',
     ];
 
     return EntityManagerBuilder::build($doctrineSettings);
