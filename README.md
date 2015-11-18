@@ -29,7 +29,7 @@ require_once './vendor/autoload.php';
 Register in the DI container as any other service.
 
 ```php
-use Jgut\Slim\Doctrine\EntitytManagerBuilder;
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
 use Slim\App;
 
 // Create Slim app and fetch DI Container
@@ -46,7 +46,7 @@ $container['entityManager'] = function () {
         'annotation_paths' => ['path_to_entities_files'],
     ];
 
-    return EntitytManagerBuilder::build($doctrineSettings);
+    return EntityManagerBuilder::build($doctrineSettings);
 };
 
 $app->get('/', function () {
@@ -60,7 +60,7 @@ $app->get('/', function () {
 You can use Slim settings service to store Doctrine configurations.
 
 ```php
-use Jgut\Slim\Doctrine\EntitytManagerBuilder;
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
 
@@ -82,7 +82,7 @@ $container = $app->getContainer();
 
 // Register Entity Manager in the container
 $container['entityManager'] = function (ContainerInterface $container) {
-    return EntitytManagerBuilder::build($container->get('settings')['doctrine']);
+    return EntityManagerBuilder::build($container->get('settings')['doctrine']);
 };
 ```
 
