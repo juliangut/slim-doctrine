@@ -108,7 +108,37 @@ $container['entityManager'] = function (ContainerInterface $container) {
 
 One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. Most commonly used is annotation_paths.
 
-Doctrine is being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available
+Doctrine is being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
+
+## CLI tool
+
+When configuring Doctrine Console tool you have to provide the same configurations passed to slim-doctrine's `EntityManagerBuilder`. One critical point is the naming strategy, while default Doctrine naming strategy is `Doctrine\ORM\Mapping\DefaultNamingStrategy` slim-doctrine changes it to `Doctrine\ORM\Mapping\UnderscoreNamingStrategy` and this should be reflected on the CLI tool setup.
+
+Find here an example of `cli-config.php` file that can be used as a template:
+
+```php
+require __DIR__ . '/vendor/autoload.php';
+
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+
+$settings = require 'configurations.php';
+
+$config = Setup::createAnnotationMetadataConfiguration(
+    $settings['doctrine']['annotation_paths'],
+    $settings['doctrine']['auto_generate_proxies'],
+    $settings['doctrine']['proxy_path'],
+    $settings['doctrine']['cache_driver'],
+    false
+);
+$config->setProxyNamespace($settings['doctrine']['proxies_namespace']);
+$config->setNamingStrategy($settings['doctrine']['naming_strategy']);
+
+$entityManager = EntityManager::create($settings['doctrine']['connection'], $config);
+
+return ConsoleRunner::createHelperSet($entityManager);
+```
 
 ## Contributing
 
