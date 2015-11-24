@@ -15,7 +15,7 @@ use Doctrine\Common\Proxy\AbstractProxyFactory;
 /**
  * @covers Jgut\Slim\Doctrine\EntityManagerBuilder
  */
-class EntityManagerTest extends \PHPUnit_Framework_TestCase
+class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
