@@ -3,6 +3,7 @@
  * Slim3 Doctrine integration (https://github.com/juliangut/slim-doctrine)
  *
  * @link https://github.com/juliangut/slim-doctrine for the canonical source repository
+ *
  * @license https://raw.githubusercontent.com/juliangut/slim-doctrine/master/LICENSE
  */
 
@@ -26,6 +27,7 @@ class EntityManagerBuilder
 {
     /**
      * @param array $options
+     *
      * @throws \InvalidArgumentException
      *
      * @return \Doctrine\ORM\EntityManager
@@ -58,7 +60,8 @@ class EntityManagerBuilder
 
     /**
      * @param \Doctrine\ORM\Configuration $config
-     * @param array $options
+     * @param array                       $options
+     *
      * @throws \InvalidArgumentException
      */
     protected static function setupNamingStrategy(Configuration &$config, array $options = [])
@@ -102,7 +105,7 @@ class EntityManagerBuilder
      * Set up annotation metadata
      *
      * @param \Doctrine\ORM\Configuration $config
-     * @param array $options
+     * @param array                       $options
      *
      * @return bool
      */
@@ -130,7 +133,7 @@ class EntityManagerBuilder
      * Set up proxies
      *
      * @param \Doctrine\ORM\Configuration $config
-     * @param array $options
+     * @param array                       $options
      */
     protected static function setupProxy(Configuration &$config, array $options = [])
     {
@@ -148,7 +151,7 @@ class EntityManagerBuilder
      * Set up SQL logger
      *
      * @param \Doctrine\ORM\Configuration $config
-     * @param array $options
+     * @param array                       $options
      */
     protected static function setupSQLLogger(Configuration &$config, array $options = [])
     {
@@ -161,9 +164,9 @@ class EntityManagerBuilder
     /**
      * Get option value or default if none existent
      *
-     * @param array $options
+     * @param array  $options
      * @param string $option
-     * @param mixed $default
+     * @param mixed  $default
      *
      * @return mixed
      */

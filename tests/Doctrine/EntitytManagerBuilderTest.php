@@ -3,6 +3,7 @@
  * Slim3 Doctrine integration (https://github.com/juliangut/slim-doctrine)
  *
  * @link https://github.com/juliangut/slim-doctrine for the canonical source repository
+ *
  * @license https://raw.githubusercontent.com/juliangut/slim-doctrine/master/LICENSE
  */
 
@@ -19,6 +20,7 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::getOption
+     *
      * @expectedException \InvalidArgumentException
      */
     public function testBadCacheDriver()
@@ -33,6 +35,7 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupNamingStrategy
+     *
      * @expectedException \InvalidArgumentException
      */
     public function testBadNamingStrategy()
@@ -47,6 +50,7 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupAnnotationMetadata
+     *
      * @expectedException \InvalidArgumentException
      */
     public function testNoMetadataDriver()
@@ -64,6 +68,7 @@ class EntityManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupMetadataDriver
+     *
      * @expectedException \InvalidArgumentException
      */
     public function testNoDriversConnection()
