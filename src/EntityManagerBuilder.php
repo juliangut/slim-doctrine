@@ -17,8 +17,6 @@ use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\Configuration;
-use Doctrine\ORM\Mapping\Driver\XmlDriver;
-use Doctrine\ORM\Mapping\Driver\YamlDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 
 /**
@@ -142,6 +140,7 @@ class EntityManagerBuilder
      * Normalize paths to array.
      *
      * @param array|string $paths
+     *
      * @return array
      */
     protected static function normalizePaths($paths)
