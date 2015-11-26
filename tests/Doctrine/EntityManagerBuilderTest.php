@@ -19,7 +19,6 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::getOption
      *
      * @expectedException \InvalidArgumentException
      */
@@ -34,26 +33,11 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupNamingStrategy
-     *
-     * @expectedException \InvalidArgumentException
-     */
-    public function testBadNamingStrategy()
-    {
-        $options = [
-            'naming_strategy' => 'notValid',
-        ];
-
-        EntityManagerBuilder::build($options);
-    }
-
-    /**
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupAnnotationMetadata
      *
      * @expectedException \InvalidArgumentException
      */
-    public function testNoMetadataDriver()
+    public function testNoMetadata()
     {
         $options = [
             'annotation_files' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
@@ -67,28 +51,45 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupMetadataDriver
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::normalizePaths
      *
      * @expectedException \InvalidArgumentException
      */
-    public function testNoDriversConnection()
+    public function testBadNamingStrategy()
     {
         $options = [
             'annotation_paths' => sys_get_temp_dir(),
-            'xml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
-            'yaml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
+            'naming_strategy' => 'notValid',
         ];
 
         EntityManagerBuilder::build($options);
     }
 
     /**
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupAnnotationMetadata
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupProxy
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupSQLLogger
-     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupMetadataDriver
+     *
+     * @expectedException \InvalidArgumentException
      */
-    public function testCreation()
+    public function testNoCreation()
+    {
+        $options = [
+            'annotation_paths' => sys_get_temp_dir(),
+            'proxies_namespace' => 'myNamespace\Proxies',
+            'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_ALWAYS,
+            'sql_logger' => new \Doctrine\DBAL\Logging\EchoSQLLogger,
+        ];
+
+        EntityManagerBuilder::build($options);
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     */
+    public function testAnnotationsCreation()
     {
         $options = [
             'connection' => [
@@ -96,9 +97,40 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 'memory' => true,
             ],
             'annotation_paths' => sys_get_temp_dir(),
-            'proxies_namespace' => 'myNamespace\Proxies',
-            'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_ALWAYS,
-            'sql_logger' => new \Doctrine\DBAL\Logging\EchoSQLLogger,
+        ];
+
+        $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     */
+    public function testXMLCreation()
+    {
+        $options = [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'xml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
+        ];
+
+        $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     */
+    public function testYAMLCreation()
+    {
+        $options = [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'yaml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
         ];
 
         $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));

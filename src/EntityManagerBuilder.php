@@ -9,6 +9,7 @@
 
 namespace Jgut\Slim\Doctrine;
 
+use InvalidArgumentException;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\Mapping\NamingStrategy;
@@ -26,152 +27,171 @@ use Doctrine\Common\Proxy\AbstractProxyFactory;
 class EntityManagerBuilder
 {
     /**
+     * Default configuration options.
+     *
+     * @var array
+     */
+    protected static $defaultOptions = [
+        'connection' => null,
+        'proxy_path' => null,
+        'cache_driver' => null,
+        'annotation_files' => [],
+        'annotation_namespaces' => [],
+        'annotation_autoloaders' => [],
+        'annotation_paths' => null,
+        'xml_paths' => null,
+        'yaml_paths' => null,
+        'naming_strategy' => null, //\Doctrine\ORM\Mapping\UnderscoreNamingStrategy
+        'proxies_namespace' => null,
+        'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
+        'sql_logger' => null,
+    ];
+
+    /**
+     * Create a Doctrine entity manager.
+     *
      * @param array $options
      *
      * @throws \InvalidArgumentException
      *
      * @return \Doctrine\ORM\EntityManager
      */
-    public static function build(array $options = [])
+    public static function build(array $options)
     {
-        $proxyDir = self::getOption($options, 'proxy_path');
-        $cache = self::getOption($options, 'cache_driver');
+        $options = array_merge(static::$defaultOptions, $options);
 
-        if ($cache !== null && !$cache instanceof Cache) {
-            throw new \InvalidArgumentException('Cache Driver provided is not valid');
+        if ($options['cache_driver'] !== null && !$options['cache_driver'] instanceof Cache) {
+            throw new InvalidArgumentException('Cache Driver provided is not valid');
         }
 
-        $config = Setup::createConfiguration(false, $proxyDir, $cache);
+        static::setupAnnotationMetadata($options);
 
-        self::setupNamingStrategy($config, $options);
-
-        self::setupAnnotationMetadata($options);
-
-        if (!self::setupMetadataDriver($config, $options)) {
-            throw new \InvalidArgumentException('No Metadata Driver defined');
+        $config = static::createConfiguration($options);
+        if (!$config instanceof Configuration) {
+            throw new InvalidArgumentException('No Metadata Driver defined');
         }
 
-        self::setupProxy($config, $options);
+        static::setupNamingStrategy($config, $options);
 
-        self::setupSQLLogger($config, $options);
+        static::setupProxy($config, $options);
 
-        return EntityManager::create(self::getOption($options, 'connection'), $config);
+        static::setupSQLLogger($config, $options);
+
+        return EntityManager::create($options['connection'], $config);
     }
 
     /**
+     * Set up annotation metadata.
+     *
+     * @param array $options
+     */
+    protected static function setupAnnotationMetadata(array $options)
+    {
+        foreach ($options['annotation_files'] as $file) {
+            AnnotationRegistry::registerFile($file);
+        }
+
+        AnnotationRegistry::registerAutoloadNamespaces($options['annotation_namespaces']);
+
+        foreach ($options['annotation_autoloaders'] as $autoloader) {
+            AnnotationRegistry::registerLoader($autoloader);
+        }
+    }
+
+    /**
+     * Create Doctrine configuration.
+     *
+     * @param array $options
+     *
+     * @return \Doctrine\ORM\Configuration|null
+     */
+    protected static function createConfiguration(array $options)
+    {
+        if ($options['annotation_paths']) {
+            return Setup::createAnnotationMetadataConfiguration(
+                static::normalizePaths($options['annotation_paths']),
+                false,
+                $options['proxy_path'],
+                $options['cache_driver'],
+                false
+            );
+        }
+
+        if ($options['xml_paths']) {
+            return Setup::createXMLMetadataConfiguration(
+                static::normalizePaths($options['xml_paths']),
+                false,
+                $options['proxy_path'],
+                $options['cache_driver']
+            );
+        }
+
+        if ($options['yaml_paths']) {
+            return Setup::createYAMLMetadataConfiguration(
+                static::normalizePaths($options['yaml_paths']),
+                false,
+                $options['proxy_path'],
+                $options['cache_driver']
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Normalize paths to array.
+     *
+     * @param array|string $paths
+     * @return array
+     */
+    protected static function normalizePaths($paths)
+    {
+        return is_array($paths) ? $paths : [$paths];
+    }
+
+    /**
+     * Setup naming strategy.
+     *
      * @param \Doctrine\ORM\Configuration $config
      * @param array                       $options
      *
      * @throws \InvalidArgumentException
      */
-    protected static function setupNamingStrategy(Configuration &$config, array $options = [])
+    protected static function setupNamingStrategy(Configuration &$config, array $options)
     {
-        $namingStrategy = self::getOption($options, 'naming_strategy') ?: new UnderscoreNamingStrategy();
+        $namingStrategy = $options['naming_strategy'] ?: new UnderscoreNamingStrategy(CASE_LOWER);
         if (!$namingStrategy instanceof NamingStrategy) {
-            throw new \InvalidArgumentException('Naming strategy provided is not valid');
+            throw new InvalidArgumentException('Naming strategy provided is not valid');
         }
 
         $config->setNamingStrategy($namingStrategy);
     }
 
     /**
-     * Set up annotation metadata
-     *
-     * @param array $options
-     */
-    protected static function setupAnnotationMetadata(array $options = [])
-    {
-        $annotationFiles = self::getOption($options, 'annotation_files');
-        if ($annotationFiles) {
-            foreach ($annotationFiles as $file) {
-                AnnotationRegistry::registerFile($file);
-            }
-        }
-
-        $annotationNamespaces = self::getOption($options, 'annotation_namespaces');
-        if ($annotationNamespaces) {
-            AnnotationRegistry::registerAutoloadNamespaces($annotationNamespaces);
-        }
-
-        $annotationAuloaders = self::getOption($options, 'annotation_autoloaders');
-        if ($annotationAuloaders) {
-            foreach ($annotationAuloaders as $autoloader) {
-                AnnotationRegistry::registerLoader($autoloader);
-            }
-        }
-    }
-
-    /**
-     * Set up annotation metadata
-     *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
-     *
-     * @return bool
-     */
-    protected static function setupMetadataDriver(Configuration &$config, array $options = [])
-    {
-        $annotationPaths = self::getOption($options, 'annotation_paths');
-        if ($annotationPaths) {
-            $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($annotationPaths, false));
-        }
-
-        $xmlPaths = self::getOption($options, 'xml_paths');
-        if ($xmlPaths) {
-            $config->setMetadataDriverImpl(new XmlDriver($xmlPaths));
-        }
-
-        $yamlPaths = self::getOption($options, 'yaml_paths');
-        if ($yamlPaths) {
-            $config->setMetadataDriverImpl(new YamlDriver($yamlPaths));
-        }
-
-        return $annotationPaths || $xmlPaths || $yamlPaths;
-    }
-
-    /**
-     * Set up proxies
+     * Setup proxies.
      *
      * @param \Doctrine\ORM\Configuration $config
      * @param array                       $options
      */
-    protected static function setupProxy(Configuration &$config, array $options = [])
+    protected static function setupProxy(Configuration &$config, array $options)
     {
-        $proxiesNamespace = self::getOption($options, 'proxies_namespace');
-        if ($proxiesNamespace) {
-            $config->setProxyNamespace($proxiesNamespace);
+        if ($options['proxies_namespace']) {
+            $config->setProxyNamespace($options['proxies_namespace']);
         }
 
-        $config->setAutoGenerateProxyClasses(
-            intval(self::getOption($options, 'auto_generate_proxies', AbstractProxyFactory::AUTOGENERATE_NEVER))
-        );
+        $config->setAutoGenerateProxyClasses(intval($options['auto_generate_proxies']));
     }
 
     /**
-     * Set up SQL logger
+     * Setup SQL logger.
      *
      * @param \Doctrine\ORM\Configuration $config
      * @param array                       $options
      */
-    protected static function setupSQLLogger(Configuration &$config, array $options = [])
+    protected static function setupSQLLogger(Configuration &$config, array $options)
     {
-        $sqlLogger = self::getOption($options, 'sql_logger');
-        if ($sqlLogger) {
-            $config->setSQLLogger($sqlLogger);
+        if ($options['sql_logger']) {
+            $config->setSQLLogger($options['sql_logger']);
         }
-    }
-
-    /**
-     * Get option value or default if none existent
-     *
-     * @param array  $options
-     * @param string $option
-     * @param mixed  $default
-     *
-     * @return mixed
-     */
-    protected static function getOption($options, $option, $default = null)
-    {
-        return isset($options[$option]) ? $options[$option] : $default;
     }
 }

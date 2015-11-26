@@ -44,7 +44,7 @@ $container['entityManager'] = function () {
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ],
-        'annotation_paths' => 'path_to_entities_files',
+        'annotation_paths' => ['path_to_entities_files'],
     ];
 
     return EntityManagerBuilder::build($doctrineSettings);
@@ -107,7 +107,7 @@ $container['entityManager'] = function (ContainerInterface $container) {
 
 `connection` configuration is mandatory either as a configurations array or as a proper Doctrine DBAL Connection
 
-One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. Most commonly used is annotation_paths.
+One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
 
 Doctrine is being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
 
