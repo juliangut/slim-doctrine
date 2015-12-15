@@ -11,6 +11,8 @@
 
 Doctrine handler service for Slim3.
 
+Frees you from the tedious work of configuring Doctrine's Entity Manager and Document Manager.
+
 ## Installation
 
 Best way to install is using [Composer](https://getcomposer.org/):
@@ -51,10 +53,8 @@ $container['entityManager'] = function () {
 };
 
 $app->get('/', function () {
-    // Use entity manager
-    $this->entityManager->beginTransaction();
-    // Do your magic
-    $this->entityManager->commit();
+    $this->entityManager->persist(new \Entity);
+    $this->entityManager->flush();
 });
 ```
 
@@ -69,10 +69,9 @@ $settings = [
     'settings' => [
         'doctrine' => [
             'connection' => [
-                'driver' => 'pdo_sqlite',
-                'memory' => true,
+                'server' => 'mongodb://localhost:27017',
             ],
-            'annotation_paths' => ['path_to_entities_files'],
+            'annotation_paths' => ['path_to_documents_files'],
         ],
     ],
 ];
@@ -81,13 +80,18 @@ $settings = [
 $app = new App($settings);
 $container = $app->getContainer();
 
-// Register Entity Manager in the container
-$container['entityManager'] = function (ContainerInterface $container) {
-    return EntityManagerBuilder::build($container->get('settings')['doctrine']);
+// Register Document Manager in the container
+$container['documentManager'] = function (ContainerInterface $container) {
+    return DocumentManagerBuilder::build($container->get('settings')['doctrine']);
 };
+
+$app->get('/', function () {
+    $this->documentManager->persist(new \Document);
+    $this->documentManager->flush();
+});
 ```
 
-### Available configurations
+### ORM Entity Manager configurations
 
 * `connection` array of PDO configurations or \Doctrine\DBAL\Connection
 * `cache_driver` \Doctrine\Common\Cache\Cache
@@ -103,17 +107,38 @@ $container['entityManager'] = function (ContainerInterface $container) {
 * `naming_strategy` \Doctrine\ORM\Mapping\NamingStrategy, defaults to `UnderscoreNamingStrategy`
 * `sql_logger` \Doctrine\DBAL\Logging\SQLLogger
 
-### Considerations
+*`connection` configuration is mandatory either as a configurations array or as a proper Doctrine DBAL Connection*
 
-`connection` configuration is mandatory either as a configurations array or as a proper Doctrine DBAL Connection
+### ODM Document Manager configurations
 
-One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
+* `connection` array of MongoClient configurations or \Doctrine\MongoDB\Connection
+* `cache_driver` \Doctrine\Common\Cache\Cache
+* `annotation_files` array of Doctrine annotations files
+* `annotation_namespaces` array of Doctrine annotations namespaces
+* `annotation_autoloaders` array of Doctrine annotations autoloader callables
+* `annotation_paths` array of paths where to find annotated document files
+* `xml_paths` array of paths where to find XML document mapping files
+* `yaml_paths` array of paths where to find YAML document mapping files
+* `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
+* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxies'
+* `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
+* `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrators'
+* `logger_callable` valid callable
 
-Doctrine is being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
+*`connection` configuration is mandatory either as a configurations array or as a proper Doctrine MongoDB Connection*
+
+## Considerations
+
+These are general topics to consider when configuring both Entity and Document managers:
+
+* One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
+
+* Managers are being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
+
 
 ## CLI tool
 
-When configuring Doctrine Console tool you have to provide the same configurations passed to slim-doctrine's `EntityManagerBuilder`. One critical point is the naming strategy, while default Doctrine naming strategy is `Doctrine\ORM\Mapping\DefaultNamingStrategy` slim-doctrine changes it to `Doctrine\ORM\Mapping\UnderscoreNamingStrategy` and this should be reflected on the CLI tool setup.
+When configuring Doctrine Console tool (for ORM management) you have to provide the same configurations passed to slim-doctrine's `EntityManagerBuilder`. One critical point is the naming strategy, while default Doctrine naming strategy is `Doctrine\ORM\Mapping\DefaultNamingStrategy` slim-doctrine changes it to `Doctrine\ORM\Mapping\UnderscoreNamingStrategy` and this should be reflected on the CLI tool setup.
 
 Find here an example of `cli-config.php` file that can be used as a template:
 

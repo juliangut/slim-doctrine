@@ -25,7 +25,11 @@
     "phpunit/phpunit": "~4.5",
     "squizlabs/php_codesniffer": "~2",
     "phpmd/phpmd": "~2.2",
-    "sebastian/phpcpd": "~2.0"
+    "sebastian/phpcpd": "~2.0",
+    "doctrine/mongodb-odm": "^1.0"
+  },
+  "suggests": {
+    "doctrine/mongodb-odm": "^1.0"
   },
   "autoload": {
     "psr-4": {
