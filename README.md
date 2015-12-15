@@ -119,6 +119,7 @@ $app->get('/', function () {
 * `annotation_paths` array of paths where to find annotated document files
 * `xml_paths` array of paths where to find XML document mapping files
 * `yaml_paths` array of paths where to find YAML document mapping files
+* `default_database` default database in case none specified
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxies'
 * `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)

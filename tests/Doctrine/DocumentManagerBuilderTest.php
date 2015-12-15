@@ -51,6 +51,7 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupDefaultDatabase
      * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupProxy
      * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupHydrator
      * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupLogger
@@ -61,6 +62,7 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $options = [
             'annotation_paths' => sys_get_temp_dir(),
+            'default_database' => 'test',
             'proxies_namespace' => 'myNamespace\Proxies',
             'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_ALWAYS,
             'hydrators_namespace' => 'myNamespace\Hydrators',

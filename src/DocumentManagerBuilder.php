@@ -41,6 +41,7 @@ class DocumentManagerBuilder
         'annotation_paths' => null,
         'xml_paths' => null,
         'yaml_paths' => null,
+        'default_database' => null,
         'proxies_namespace' => null,
         'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
         'hydrators_namespace' => null,
@@ -70,6 +71,8 @@ class DocumentManagerBuilder
         if (!$config instanceof Configuration) {
             throw new InvalidArgumentException('No Metadata Driver defined');
         }
+
+        static::setupDefaultDatabase($config, $options);
 
         static::setupProxy($config, $options);
 
@@ -197,6 +200,19 @@ class DocumentManagerBuilder
     protected static function normalizePaths($paths)
     {
         return is_array($paths) ? $paths : [$paths];
+    }
+
+    /**
+     * Setup default database.
+     *
+     * @param \Doctrine\ODM\MongoDB\Configuration $config
+     * @param array                               $options
+     */
+    protected static function setupDefaultDatabase(Configuration &$config, array $options)
+    {
+        if ($options['default_database']) {
+            $config->setDefaultDB($options['default_database']);
+        }
     }
 
     /**
