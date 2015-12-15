@@ -122,7 +122,7 @@ class DocumentManagerBuilder
         }
 
         if ($options['yaml_paths']) {
-            $config->setMetadataDriverImpl(new XmlDriver(static::normalizePaths($options['yaml_paths'])));
+            $config->setMetadataDriverImpl(new YamlDriver(static::normalizePaths($options['yaml_paths'])));
         }
 
         return $config->getMetadataDriverImpl() !== null ? $config : null;
@@ -157,7 +157,7 @@ class DocumentManagerBuilder
     /**
      * Get cache driver.
      *
-     * @param  array $options
+     * @param array $options
      *
      * @return \Doctrine\Common\Cache\Cache
      */
@@ -243,7 +243,7 @@ class DocumentManagerBuilder
     /**
      * Create MongoDB Connection.
      *
-     * @param  array $options
+     * @param array $options
      *
      * @throws \InvalidArgumentException
      *
