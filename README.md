@@ -104,10 +104,8 @@ $app->get('/', function () {
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineProxies'
 * `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
-* `naming_strategy` \Doctrine\ORM\Mapping\NamingStrategy, defaults to `UnderscoreNamingStrategy`
-* `sql_logger` \Doctrine\DBAL\Logging\SQLLogger
-
-*`connection` configuration is mandatory either as a configurations array or as a proper Doctrine DBAL Connection*
+* `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
+* `sql_logger` a `\Doctrine\DBAL\Logging\SQLLogger`
 
 ### ODM Document Manager configurations
 
@@ -119,23 +117,24 @@ $app->get('/', function () {
 * `annotation_paths` array of paths where to find annotated document files
 * `xml_paths` array of paths where to find XML document mapping files
 * `yaml_paths` array of paths where to find YAML document mapping files
-* `default_database` default database in case none specified
+* `default_database` default database to be used in case none specified
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxies'
 * `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
 * `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrators'
 * `logger_callable` valid callable
 
-*`connection` configuration is mandatory either as a configurations array or as a proper Doctrine MongoDB Connection*
-
 ## Considerations
 
-These are general topics to consider when configuring both Entity and Document managers:
+These are general considerations when configuring both Entity and Document managers:
 
-* One of `annotation_paths`, `xml_paths` or `yaml_paths` is mandatory as it's needed by Doctrine to include a Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
+* `connection` configuration is mandatory:
+    * For ORM as a PDO configurations array or as a proper Doctrine DBAL Connection.
+    * For ODM as a MongoClient configurations array or as a proper Doctrine MongoDB Connection.
+
+* One of 'path' configurations is mandatory ( `annotation_paths`, `xml_paths` or `yaml_paths`) as it's needed by Doctrine to configure the Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
 
 * Managers are being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
-
 
 ## CLI tool
 
@@ -180,8 +179,6 @@ See file [CONTRIBUTING.md](https://github.com/juliangut/slim-doctrine/blob/maste
 * [@mgersten (Micah Gersten)](https://github.com/mgersten)
 
 ## License
-
-### Release under BSD-3-Clause License.
 
 See file [LICENSE](https://github.com/juliangut/slim-doctrine/blob/master/LICENSE) included with the source code for a copy of the license terms
 
