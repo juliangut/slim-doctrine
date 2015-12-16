@@ -9,15 +9,15 @@
 
 namespace Jgut\Slim\Doctrine;
 
-use InvalidArgumentException;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\Cache;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\Common\Proxy\AbstractProxyFactory;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
-use Doctrine\ORM\EntityManager;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\ORM\Configuration;
-use Doctrine\Common\Proxy\AbstractProxyFactory;
+use Doctrine\ORM\Tools\Setup;
+use InvalidArgumentException;
 
 /**
  * Doctrine Entity Manager service builder

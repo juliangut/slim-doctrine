@@ -9,9 +9,9 @@
 
 namespace Jgut\Slim\Doctrine;
 
-use InvalidArgumentException;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
@@ -19,6 +19,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver;
+use InvalidArgumentException;
 
 /**
  * Doctrine Document Manager service builder.
@@ -55,7 +56,7 @@ class DocumentManagerBuilder
      *
      * @throws \InvalidArgumentException
      *
-     * @return \Doctrine\ORM\EntityManager
+     * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
     public static function build(array $options)
     {
@@ -167,6 +168,7 @@ class DocumentManagerBuilder
     protected static function getCacheDriver(array $options)
     {
         $cache = $options['cache_driver'];
+
         if ($cache === null) {
             if (extension_loaded('apc')) {
                 $cache = new \Doctrine\Common\Cache\ApcCache();
