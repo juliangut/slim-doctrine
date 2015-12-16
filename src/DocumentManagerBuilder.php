@@ -19,7 +19,6 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\XmlDriver;
 use Doctrine\ODM\MongoDB\Mapping\Driver\YamlDriver;
-use InvalidArgumentException;
 
 /**
  * Doctrine Document Manager service builder.
@@ -63,14 +62,14 @@ class DocumentManagerBuilder
         $options = array_merge(static::$defaultOptions, $options);
 
         if ($options['cache_driver'] !== null && !$options['cache_driver'] instanceof Cache) {
-            throw new InvalidArgumentException('Cache Driver provided is not valid');
+            throw new \InvalidArgumentException('Cache Driver provided is not valid');
         }
 
         static::setupAnnotationMetadata($options);
 
         $config = static::createConfiguration($options);
         if (!$config instanceof Configuration) {
-            throw new InvalidArgumentException('No Metadata Driver defined');
+            throw new \InvalidArgumentException('No Metadata Driver defined');
         }
 
         static::setupDefaultDatabase($config, $options);
@@ -273,7 +272,7 @@ class DocumentManagerBuilder
 
         if (!$connection instanceof Connection) {
             if (!is_array($connection)) {
-                throw new InvalidArgumentException(sprintf('Invalid argument: %s', $connection));
+                throw new \InvalidArgumentException(sprintf('Invalid argument: %s', $connection));
             }
 
             $connection = new Connection(

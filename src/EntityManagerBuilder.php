@@ -17,7 +17,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\Tools\Setup;
-use InvalidArgumentException;
 
 /**
  * Doctrine Entity Manager service builder
@@ -59,14 +58,14 @@ class EntityManagerBuilder
         $options = array_merge(static::$defaultOptions, $options);
 
         if ($options['cache_driver'] !== null && !$options['cache_driver'] instanceof Cache) {
-            throw new InvalidArgumentException('Cache Driver provided is not valid');
+            throw new \InvalidArgumentException('Cache Driver provided is not valid');
         }
 
         static::setupAnnotationMetadata($options);
 
         $config = static::createConfiguration($options);
         if (!$config instanceof Configuration) {
-            throw new InvalidArgumentException('No Metadata Driver defined');
+            throw new \InvalidArgumentException('No Metadata Driver defined');
         }
 
         static::setupNamingStrategy($config, $options);
@@ -160,7 +159,7 @@ class EntityManagerBuilder
     {
         $namingStrategy = $options['naming_strategy'] ?: new UnderscoreNamingStrategy(CASE_LOWER);
         if (!$namingStrategy instanceof NamingStrategy) {
-            throw new InvalidArgumentException('Naming strategy provided is not valid');
+            throw new \InvalidArgumentException('Naming strategy provided is not valid');
         }
 
         $config->setNamingStrategy($namingStrategy);
