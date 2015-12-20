@@ -61,7 +61,7 @@ $app->get('/', function () {
 You can use Slim settings service to store Doctrine configurations.
 
 ```php
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
+use Jgut\Slim\Doctrine\DocumentManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
 
@@ -102,8 +102,8 @@ $app->get('/', function () {
 * `xml_paths` array of paths where to find XML entity mapping files
 * `yaml_paths` array of paths where to find YAML entity mapping files
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
-* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineProxies'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
+* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineORMProxy'
+* `auto_generate_proxies` integer indicating proxy auto generation behavior.
 * `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
 * `sql_logger` a `\Doctrine\DBAL\Logging\SQLLogger`
 
@@ -119,9 +119,9 @@ $app->get('/', function () {
 * `yaml_paths` array of paths where to find YAML document mapping files
 * `default_database` default database to be used in case none specified
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
-* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxies'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior. Values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, defaults to `AUTOGENERATE_NEVER` (0)
-* `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrators'
+* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxy'
+* `auto_generate_proxies` integer indicating proxy auto generation behavior.
+* `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrator'
 * `logger_callable` valid callable
 
 ## Considerations
@@ -134,36 +134,46 @@ These are general considerations when configuring both Entity and Document manag
 
 * One of 'path' configurations is mandatory ( `annotation_paths`, `xml_paths` or `yaml_paths`) as it's needed by Doctrine to configure the Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
 
-* Managers are being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` was provided, Doctrine will use an auto-generated cache driver in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache`, and finally fall back to `ArrayCache` which is always available.
+* `auto_generate_proxies` configuration values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, in both cases it defaults to `Doctrine\Common\Proxy\AbstractProxyFactory::AUTOGENERATE_NEVER` (0).
+
+* Managers are being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` or finally fall back to `ArrayCache` which is always available. It is recommended you provide your cache always, for development you can use `VoidCache`.
 
 ## CLI tool
-
-When configuring Doctrine Console tool (for ORM management) you have to provide the same configurations passed to slim-doctrine's `EntityManagerBuilder`. One critical point is the naming strategy, while default Doctrine naming strategy is `Doctrine\ORM\Mapping\DefaultNamingStrategy` slim-doctrine changes it to `Doctrine\ORM\Mapping\UnderscoreNamingStrategy` and this should be reflected on the CLI tool setup.
 
 Find here an example of `cli-config.php` file that can be used as a template:
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Jgut\Slim\Doctrine\DocumentManagerBuilder;
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
 
+$CLISettings = [
+    'cache_driver' => new VoidCache,
+];
 $settings = require 'configurations.php';
 
-$config = Setup::createAnnotationMetadataConfiguration(
-    $settings['doctrine']['annotation_paths'],
-    $settings['doctrine']['auto_generate_proxies'],
-    $settings['doctrine']['proxy_path'],
-    $settings['doctrine']['cache_driver'],
-    false
-);
-$config->setProxyNamespace($settings['doctrine']['proxies_namespace']);
-$config->setNamingStrategy($settings['doctrine']['naming_strategy']);
+$entityManager = EntityManagerBuilder::build(array_merge($settings['entity_manager'], $CLISettings));
+$documentManager = DocumentManagerBuilder::build(array_merge($settings['document_manager'], $CLISettings);
 
-$entityManager = EntityManager::create($settings['doctrine']['connection'], $config);
+$helperSet = ConsoleRunner::createHelperSet($entityManager);
+$helperSet->set(new DocumentManagerHelper($documentManager), 'dm');
 
-return ConsoleRunner::createHelperSet($entityManager);
+$cli = ConsoleRunner::createApplication($helperSet, [
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateDocumentsCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateHydratorsCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateProxiesCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateRepositoriesCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\QueryCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\ClearCache\MetadataCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\CreateCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\DropCommand(),
+    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\UpdateCommand(),
+]);
+
+return $cli->run();
 ```
 
 ## Contributing
