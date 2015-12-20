@@ -32,8 +32,6 @@ class DocumentManagerBuilder
      */
     protected static $defaultOptions = [
         'connection' => null,
-        'proxy_path' => null,
-        'hydrator_path' => null,
         'cache_driver' => null,
         'annotation_files' => [],
         'annotation_namespaces' => [],
@@ -42,10 +40,13 @@ class DocumentManagerBuilder
         'xml_paths' => null,
         'yaml_paths' => null,
         'default_database' => null,
+        'proxy_path' => null,
         'proxies_namespace' => null,
         'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
+        'hydrator_path' => null,
         'hydrators_namespace' => null,
         'logger_callable' => null,
+        'event_manager' => null,
     ];
 
     /**
@@ -80,7 +81,7 @@ class DocumentManagerBuilder
 
         static::setupLogger($config, $options);
 
-        return DocumentManager::create(self::getConnection($options), $config);
+        return DocumentManager::create(self::getConnection($options), $config, $options['event_manager']);
     }
 
     /**

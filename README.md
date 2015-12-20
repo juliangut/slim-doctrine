@@ -101,11 +101,12 @@ $app->get('/', function () {
 * `annotation_paths` array of paths where to find annotated entity files
 * `xml_paths` array of paths where to find XML entity mapping files
 * `yaml_paths` array of paths where to find YAML entity mapping files
+* `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineORMProxy'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior.
-* `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
+* `auto_generate_proxies` integer indicating proxy auto generation behavior
 * `sql_logger` a `\Doctrine\DBAL\Logging\SQLLogger`
+* `event_manager` a configured `Doctrine\Common\EventManager`
 
 ### ODM Document Manager configurations
 
@@ -118,11 +119,13 @@ $app->get('/', function () {
 * `xml_paths` array of paths where to find XML document mapping files
 * `yaml_paths` array of paths where to find YAML document mapping files
 * `default_database` default database to be used in case none specified
-* `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
+* `proxy_path` path where Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxy'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior.
+* `auto_generate_proxies` integer indicating proxy auto generation behavior
+* `hydrator_path` path where Doctrine creates its hydrator classes, defaults to /tmp
 * `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrator'
 * `logger_callable` valid callable
+* `event_manager` a configured `Doctrine\Common\EventManager`
 
 ## Considerations
 

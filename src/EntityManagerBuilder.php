@@ -30,7 +30,6 @@ class EntityManagerBuilder
      */
     protected static $defaultOptions = [
         'connection' => null,
-        'proxy_path' => null,
         'cache_driver' => null,
         'annotation_files' => [],
         'annotation_namespaces' => [],
@@ -38,10 +37,12 @@ class EntityManagerBuilder
         'annotation_paths' => null,
         'xml_paths' => null,
         'yaml_paths' => null,
-        'naming_strategy' => null, //\Doctrine\ORM\Mapping\UnderscoreNamingStrategy
+        'naming_strategy' => null,
+        'proxy_path' => null,
         'proxies_namespace' => null,
         'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
         'sql_logger' => null,
+        'event_manager' => null,
     ];
 
     /**
@@ -74,7 +75,7 @@ class EntityManagerBuilder
 
         static::setupSQLLogger($config, $options);
 
-        return EntityManager::create($options['connection'], $config);
+        return EntityManager::create($options['connection'], $config, $options['event_manager']);
     }
 
     /**
