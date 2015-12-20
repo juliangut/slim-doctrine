@@ -173,9 +173,11 @@ class EntityManagerBuilder
      */
     protected static function setupProxy(Configuration &$config, array $options)
     {
-        if ($options['proxies_namespace']) {
-            $config->setProxyNamespace($options['proxies_namespace']);
+        if (!$options['proxies_namespace']) {
+            $options['proxies_namespace'] = 'DoctrineORMProxy';
         }
+
+        $config->setProxyNamespace($options['proxies_namespace']);
 
         $config->setAutoGenerateProxyClasses(intval($options['auto_generate_proxies']));
     }

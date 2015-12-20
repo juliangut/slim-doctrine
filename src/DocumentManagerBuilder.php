@@ -49,7 +49,7 @@ class DocumentManagerBuilder
     ];
 
     /**
-     * Create a Doctrine entity manager.
+     * Create a Doctrine document manager.
      *
      * @param array $options
      *
@@ -150,9 +150,9 @@ class DocumentManagerBuilder
         $config = new Configuration();
         $config->setMetadataCacheImpl($cache);
         $config->setProxyDir($proxyDir);
-        $config->setProxyNamespace('DoctrineODMProxies');
+        $config->setProxyNamespace('DoctrineODMProxy');
         $config->setHydratorDir($options['hydrator_path'] ?: sys_get_temp_dir());
-        $config->setHydratorNamespace('DoctrineODMHydrators');
+        $config->setHydratorNamespace('DoctrineODMHydrator');
 
         return $config;
     }
