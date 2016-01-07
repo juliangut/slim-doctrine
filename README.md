@@ -159,7 +159,7 @@ $CLISettings = [
 $settings = require 'configurations.php';
 
 $entityManager = EntityManagerBuilder::build(array_merge($settings['entity_manager'], $CLISettings));
-$documentManager = DocumentManagerBuilder::build(array_merge($settings['document_manager'], $CLISettings);
+$documentManager = DocumentManagerBuilder::build(array_merge($settings['document_manager'], $CLISettings));
 
 $helperSet = ConsoleRunner::createHelperSet($entityManager);
 $helperSet->set(new DocumentManagerHelper($documentManager), 'dm');
