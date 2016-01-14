@@ -12,9 +12,14 @@ namespace Jgut\Slim\Doctrine;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
+use Doctrine\ORM\Mapping\Driver\StaticPHPDriver;
 use Doctrine\ORM\Mapping\NamingStrategy;
+use Doctrine\ORM\Mapping\QuoteStrategy;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\Tools\Setup;
 
@@ -37,12 +42,18 @@ class EntityManagerBuilder
         'annotation_paths' => null,
         'xml_paths' => null,
         'yaml_paths' => null,
+        'php_paths' => null,
         'naming_strategy' => null,
+        'quote_strategy' => null,
         'proxy_path' => null,
         'proxies_namespace' => null,
         'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
         'sql_logger' => null,
         'event_manager' => null,
+        'custom_types' => [],
+        'string_functions' => [],
+        'numeric_functions' => [],
+        'datetime_functions' => [],
     ];
 
     /**
@@ -71,11 +82,19 @@ class EntityManagerBuilder
 
         static::setupNamingStrategy($config, $options);
 
+        static::setupQuoteStrategy($config, $options);
+
         static::setupProxy($config, $options);
 
         static::setupSQLLogger($config, $options);
 
-        return EntityManager::create($options['connection'], $config, $options['event_manager']);
+        static::setupCustomDQLFunctions($config, $options);
+
+        $entityManager = EntityManager::create($options['connection'], $config, $options['event_manager']);
+
+        static::setupCustomDBALTypes($entityManager->getConnection(), $options);
+
+        return $entityManager;
     }
 
     /**
@@ -133,6 +152,17 @@ class EntityManagerBuilder
             );
         }
 
+        if ($options['php_paths']) {
+            $config = Setup::createConfiguration(
+                false,
+                $options['proxy_path'],
+                $options['cache_driver']
+            );
+            $config->setMetadataDriverImpl(new StaticPHPDriver(static::normalizePaths($options['php_paths'])));
+
+            return $config;
+        }
+
         return null;
     }
 
@@ -167,6 +197,24 @@ class EntityManagerBuilder
     }
 
     /**
+     * Setup quote strategy.
+     *
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected static function setupQuoteStrategy(Configuration &$config, array $options)
+    {
+        $quoteStrategy = $options['quote_strategy'] ?: new DefaultQuoteStrategy();
+        if (!$quoteStrategy instanceof QuoteStrategy) {
+            throw new \InvalidArgumentException('Quote strategy provided is not valid');
+        }
+
+        $config->setQuoteStrategy($quoteStrategy);
+    }
+
+    /**
      * Setup proxies.
      *
      * @param \Doctrine\ORM\Configuration $config
@@ -174,11 +222,8 @@ class EntityManagerBuilder
      */
     protected static function setupProxy(Configuration &$config, array $options)
     {
-        if (!$options['proxies_namespace']) {
-            $options['proxies_namespace'] = 'DoctrineORMProxy';
-        }
-
-        $config->setProxyNamespace($options['proxies_namespace']);
+        $proxiesNamespace = $options['proxies_namespace'] ? $options['proxies_namespace'] : 'DoctrineORMProxy';
+        $config->setProxyNamespace((string) $proxiesNamespace);
 
         $config->setAutoGenerateProxyClasses(intval($options['auto_generate_proxies']));
     }
@@ -193,6 +238,35 @@ class EntityManagerBuilder
     {
         if ($options['sql_logger']) {
             $config->setSQLLogger($options['sql_logger']);
+        }
+    }
+
+    /**
+     * Setup custom DQL functions.
+     *
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
+     */
+    protected static function setupCustomDQLFunctions(Configuration &$config, array $options)
+    {
+        $config->setCustomStringFunctions($options['string_functions']);
+
+        $config->setCustomNumericFunctions($options['numeric_functions']);
+
+        $config->setCustomDatetimeFunctions($options['datetime_functions']);
+    }
+
+    /**
+     * Setup Custom DBAL types.
+     *
+     * @param \Doctrine\DBAL\Connection $connection
+     * @param array                     $options
+     */
+    protected static function setupCustomDBALTypes(Connection &$connection, array $options)
+    {
+        foreach ($options['custom_types'] as $name => $class) {
+            Type::addType($name, $class);
+            $connection->getDatabasePlatform()->registerDoctrineTypeMapping($name, $name);
         }
     }
 }
