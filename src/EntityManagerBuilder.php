@@ -91,8 +91,9 @@ class EntityManagerBuilder
         static::setupCustomDQLFunctions($config, $options);
 
         $entityManager = EntityManager::create($options['connection'], $config, $options['event_manager']);
+        $connection = $entityManager->getConnection();
 
-        static::setupCustomDBALTypes($entityManager->getConnection(), $options);
+        static::setupCustomDBALTypes($connection, $options);
 
         return $entityManager;
     }
