@@ -226,7 +226,7 @@ class EntityManagerBuilder
         $proxiesNamespace = $options['proxies_namespace'] ? $options['proxies_namespace'] : 'DoctrineORMProxy';
         $config->setProxyNamespace((string) $proxiesNamespace);
 
-        $config->setAutoGenerateProxyClasses(intval($options['auto_generate_proxies']));
+        $config->setAutoGenerateProxyClasses((int) $options['auto_generate_proxies']);
     }
 
     /**

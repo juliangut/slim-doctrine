@@ -117,7 +117,7 @@ class DocumentManagerBuilder
 
         if ($options['annotation_paths']) {
             $config->setMetadataDriverImpl(
-                $config->newDefaultAnnotationDriver(static::normalizePaths($options['annotation_paths']), false)
+                $config->newDefaultAnnotationDriver(static::normalizePaths($options['annotation_paths']))
             );
         }
 
@@ -170,8 +170,9 @@ class DocumentManagerBuilder
         $cache = $options['cache_driver'];
 
         if ($cache === null) {
+            // @codeCoverageIgnoreStart
             if (extension_loaded('apc')) {
-                $cache = new \Doctrine\Common\Cache\ApcCache();
+                $cache = new \Doctrine\Common\Cache\ApcuCache();
             } elseif (extension_loaded('xcache')) {
                 $cache = new \Doctrine\Common\Cache\XcacheCache();
             } elseif (extension_loaded('memcache')) {
@@ -187,6 +188,7 @@ class DocumentManagerBuilder
             } else {
                 $cache = new \Doctrine\Common\Cache\ArrayCache();
             }
+            // @codeCoverageIgnoreEnd
         }
 
         return $cache;
@@ -229,7 +231,7 @@ class DocumentManagerBuilder
             $config->setProxyNamespace($options['proxies_namespace']);
         }
 
-        $config->setAutoGenerateProxyClasses(intval($options['auto_generate_proxies']));
+        $config->setAutoGenerateProxyClasses((int) $options['auto_generate_proxies']);
     }
 
     /**
