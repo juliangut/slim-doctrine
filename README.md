@@ -41,7 +41,7 @@ $container = $app->getContainer();
 
 // Register Entity Manager in the container
 $container['entityManager'] = function () {
-    $doctrineSettings = [
+    $doctrineORMSettings = [
         'connection' => [
             'driver' => 'pdo_sqlite',
             'memory' => true,
@@ -49,7 +49,7 @@ $container['entityManager'] = function () {
         'annotation_paths' => ['path_to_entities_files'],
     ];
 
-    return EntityManagerBuilder::build($doctrineSettings);
+    return EntityManagerBuilder::build($doctrineORMSettings);
 };
 
 $app->get('/', function () {
@@ -67,7 +67,7 @@ use Slim\App;
 
 $settings = [
     'settings' => [
-        'doctrine' => [
+        'doctrine_odm' => [
             'connection' => [
                 'server' => 'mongodb://localhost:27017',
             ],
@@ -82,7 +82,7 @@ $container = $app->getContainer();
 
 // Register Document Manager in the container
 $container['documentManager'] = function (ContainerInterface $container) {
-    return DocumentManagerBuilder::build($container->get('settings')['doctrine']);
+    return DocumentManagerBuilder::build($container->get('settings')['doctrine_odm']);
 };
 
 $app->get('/', function () {
@@ -101,12 +101,18 @@ $app->get('/', function () {
 * `annotation_paths` array of paths where to find annotated entity files
 * `xml_paths` array of paths where to find XML entity mapping files
 * `yaml_paths` array of paths where to find YAML entity mapping files
+* `php_paths` array of paths where to find PHP entity mapping files
 * `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
+* `quote_strategy` a `\Doctrine\ORM\Mapping\QuoteStrategy`, defaults to `DefaultQuoteStrategy`
 * `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineORMProxy'
 * `auto_generate_proxies` integer indicating proxy auto generation behavior
 * `sql_logger` a `\Doctrine\DBAL\Logging\SQLLogger`
 * `event_manager` a configured `Doctrine\Common\EventManager`
+* `custom_types` array of `'type_name' => '\Doctrine\DBAL\Types\Type'`
+* `string_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
+* `numeric_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
+* `datetime_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
 
 ### ODM Document Manager configurations
 
@@ -135,7 +141,7 @@ These are general considerations when configuring both Entity and Document manag
     * For ORM as a PDO configurations array or as a proper Doctrine DBAL Connection.
     * For ODM as a MongoClient configurations array or as a proper Doctrine MongoDB Connection.
 
-* One of 'path' configurations is mandatory ( `annotation_paths`, `xml_paths` or `yaml_paths`) as it's needed by Doctrine to configure the Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
+* One of 'paths' configurations is mandatory (`annotation_paths`, `xml_paths`, `yaml_paths` or `php_paths`) as it's needed by Doctrine to configure the Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
 
 * `auto_generate_proxies` configuration values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, in both cases it defaults to `Doctrine\Common\Proxy\AbstractProxyFactory::AUTOGENERATE_NEVER` (0).
 

@@ -68,8 +68,26 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::normalizePaths
+     *
+     * @expectedException \InvalidArgumentException
+     */
+    public function testBadQuoteStrategy()
+    {
+        $options = [
+            'annotation_paths' => sys_get_temp_dir(),
+            'quote_strategy' => 'notValid',
+        ];
+
+        EntityManagerBuilder::build($options);
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupProxy
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupSQLLogger
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::setupCustomDQLFunctions
      *
      * @expectedException \InvalidArgumentException
      */
@@ -89,7 +107,7 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
      */
-    public function testAnnotationsCreation()
+    public function testCreationFromAnnotationFile()
     {
         $options = [
             'connection' => [
@@ -106,7 +124,7 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
      */
-    public function testXMLCreation()
+    public function testCreationFromXMLFile()
     {
         $options = [
             'connection' => [
@@ -123,7 +141,7 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
      * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
      */
-    public function testYAMLCreation()
+    public function testCreationFromYAMLFile()
     {
         $options = [
             'connection' => [
@@ -131,6 +149,43 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 'memory' => true,
             ],
             'yaml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
+        ];
+
+        $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     */
+    public function testCreationFromPHPFile()
+    {
+        $options = [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'php_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
+        ];
+
+        $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
+    }
+
+    /**
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::build
+     * @cover \Jgut\Slim\Doctrine\EntityManagerBuilder::createConfiguration
+     */
+    public function testCustomTypes()
+    {
+        $options = [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'annotation_paths' => sys_get_temp_dir(),
+            'custom_types' => [
+                'custom' => '\Doctrine\DBAL\Types\DecimalType',
+            ],
         ];
 
         $this->assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
