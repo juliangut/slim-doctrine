@@ -18,8 +18,6 @@ use Doctrine\Common\Proxy\AbstractProxyFactory;
 class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     *
      * @expectedException \InvalidArgumentException
      */
     public function testBadCacheDriver()
@@ -32,9 +30,6 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupAnnotationMetadata
-     *
      * @expectedException \InvalidArgumentException
      */
     public function testNoMetadata()
@@ -50,12 +45,6 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupDefaultDatabase
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupProxy
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupHydrator
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::setupLogger
-     *
      * @expectedException \InvalidArgumentException
      */
     public function testNoCreation()
@@ -73,10 +62,6 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
         DocumentManagerBuilder::build($options);
     }
 
-    /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::createConfiguration
-     */
     public function testAnnotationsCreation()
     {
         $options = [
@@ -86,13 +71,9 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
             'annotation_paths' => sys_get_temp_dir(),
         ];
 
-        $this->assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
+        self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
     }
 
-    /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::createConfiguration
-     */
     public function testXMLCreation()
     {
         $options = [
@@ -102,13 +83,9 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
             'xml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
         ];
 
-        $this->assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
+        self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
     }
 
-    /**
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::build
-     * @cover \Jgut\Slim\Doctrine\DocumentManagerBuilder::createConfiguration
-     */
     public function testYAMLCreation()
     {
         $options = [
@@ -118,6 +95,6 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
             'yaml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
         ];
 
-        $this->assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
+        self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
     }
 }

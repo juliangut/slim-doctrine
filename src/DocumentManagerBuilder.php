@@ -170,6 +170,7 @@ class DocumentManagerBuilder
         $cache = $options['cache_driver'];
 
         if ($cache === null) {
+            // @codeCoverageIgnoreStart
             if (extension_loaded('apc')) {
                 $cache = new \Doctrine\Common\Cache\ApcCache();
             } elseif (extension_loaded('xcache')) {
@@ -187,6 +188,7 @@ class DocumentManagerBuilder
             } else {
                 $cache = new \Doctrine\Common\Cache\ArrayCache();
             }
+            // @codeCoverageIgnoreEnd
         }
 
         return $cache;
