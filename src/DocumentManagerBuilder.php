@@ -124,13 +124,13 @@ class DocumentManagerBuilder
         }
 
         if ($options['xml_paths']) {
-            $config->setMetadataDriverImpl(new XmlDriver((array) $options['xml_paths']));
+            $config->setMetadataDriverImpl(new XmlDriver((array) $options['xml_paths'], '.xml'));
 
             return;
         }
 
         if ($options['yaml_paths']) {
-            $config->setMetadataDriverImpl(new YamlDriver((array) $options['yaml_paths']));
+            $config->setMetadataDriverImpl(new YamlDriver((array) $options['yaml_paths'], '.yml'));
 
             return;
         }
