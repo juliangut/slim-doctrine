@@ -9,13 +9,15 @@
 
 namespace Jgut\Slim\Doctrine;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
-use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Mapping\QuoteStrategy;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
@@ -77,7 +79,7 @@ class EntityManagerBuilder
         static::setupAnnotationMetadata($options);
 
         $config = static::getConfiguration($options);
-        static::setMetadataDriver($config, $options);
+        static::setupMetadataDriver($config, $options);
         static::setupNamingStrategy($config, $options);
         static::setupQuoteStrategy($config, $options);
         static::setupProxy($config, $options);
@@ -121,42 +123,31 @@ class EntityManagerBuilder
     }
 
     /**
-     * Create Doctrine configuration.
-     *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param array $options
      *
      * @throws \RuntimeException
+     *
+     * @return \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver
      */
-    protected static function setMetadataDriver(Configuration $config, array $options)
+    protected static function getMetadataDriver(array $options)
     {
         if ($options['annotation_paths']) {
-            $config->setMetadataDriverImpl(
-                $config->newDefaultAnnotationDriver((array) $options['annotation_paths'], false)
-            );
-
-            return;
+            return new AnnotationDriver(new AnnotationReader, (array) $options['annotation_paths']);
         }
 
         if ($options['xml_paths']) {
-            $config->setMetadataDriverImpl(new XmlDriver((array) $options['xml_paths'], '.xml'));
-
-            return;
+            return new XmlDriver((array) $options['xml_paths'], '.xml');
         }
 
         if ($options['yaml_paths']) {
-            $config->setMetadataDriverImpl(new YamlDriver((array) $options['yaml_paths'], '.yml'));
-
-            return;
+            return new YamlDriver((array) $options['yaml_paths'], '.yml');
         }
 
         if ($options['php_paths']) {
-            $config->setMetadataDriverImpl(new StaticPHPDriver((array) $options['php_paths']));
-
-            return;
+            return new StaticPHPDriver((array) $options['php_paths']);
         }
 
-        throw new \RuntimeException('No Metadata Driver defined');
+        throw new \RuntimeException('No Metadata paths defined');
     }
 
     /**

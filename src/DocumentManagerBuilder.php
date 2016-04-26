@@ -9,6 +9,7 @@
 
 namespace Jgut\Slim\Doctrine;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\MongoDB\Connection;
@@ -106,42 +107,31 @@ class DocumentManagerBuilder
     }
 
     /**
-     * Create Doctrine ODM configuration.
-     *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
+     * @param array $options
      *
      * @throws \RuntimeException
+     *
+     * @return \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver
      */
-    protected static function setupMetadataDriver(Configuration $config, array $options)
+    protected static function getMetadataDriver(array $options)
     {
         if ($options['annotation_paths']) {
-            $config->setMetadataDriverImpl(
-                $config->newDefaultAnnotationDriver((array) $options['annotation_paths'])
-            );
-
-            return;
+            return new AnnotationDriver(new AnnotationReader, (array) $options['annotation_paths']);
         }
 
         if ($options['xml_paths']) {
-            $config->setMetadataDriverImpl(new XmlDriver((array) $options['xml_paths'], '.xml'));
-
-            return;
+            return new XmlDriver((array) $options['xml_paths'], '.xml');
         }
 
         if ($options['yaml_paths']) {
-            $config->setMetadataDriverImpl(new YamlDriver((array) $options['yaml_paths'], '.yml'));
-
-            return;
+            return new YamlDriver((array) $options['yaml_paths'], '.yml');
         }
 
         if ($options['php_paths']) {
-            $config->setMetadataDriverImpl(new StaticPHPDriver((array) $options['php_paths']));
-
-            return;
+            return new StaticPHPDriver((array) $options['php_paths']);
         }
 
-        throw new \RuntimeException('No Metadata Driver defined');
+        throw new \RuntimeException('No Metadata paths defined');
     }
 
     /**
