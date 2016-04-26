@@ -9,6 +9,8 @@
 
 namespace Jgut\Slim\Doctrine\Tests;
 
+use Doctrine\Common\EventManager;
+use Doctrine\MongoDB\Connection;
 use Jgut\Slim\Doctrine\DocumentManagerBuilder;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 
@@ -30,7 +32,7 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \RuntimeException
      */
     public function testNoMetadata()
     {
@@ -47,7 +49,7 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testNoCreation()
+    public function testNoConnection()
     {
         $options = [
             'annotation_paths' => sys_get_temp_dir(),
@@ -62,19 +64,37 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
         DocumentManagerBuilder::build($options);
     }
 
-    public function testAnnotationsCreation()
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testBadEventManager()
     {
         $options = [
-            'connection' => [
-                'server' => 'mongodb://localhost:27017',
-            ],
+            'connection' => new Connection(),
+            'annotation_paths' => sys_get_temp_dir(),
+            'default_database' => 'test',
+            'proxies_namespace' => 'myNamespace\Proxies',
+            'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_ALWAYS,
+            'hydrators_namespace' => 'myNamespace\Hydrators',
+            'logger_callable' => function () {
+            },
+            'event_manager' => new EventManager()
+        ];
+
+        DocumentManagerBuilder::build($options);
+    }
+
+    public function testCreationFromAnnotationFile()
+    {
+        $options = [
+            'connection' => new Connection('mongodb://localhost:27017'),
             'annotation_paths' => sys_get_temp_dir(),
         ];
 
         self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
     }
 
-    public function testXMLCreation()
+    public function testCreationFromXMLFile()
     {
         $options = [
             'connection' => [
@@ -86,13 +106,25 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
         self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
     }
 
-    public function testYAMLCreation()
+    public function testCreationFromYAMLFile()
     {
         $options = [
             'connection' => [
                 'server' => 'mongodb://localhost:27017',
             ],
             'yaml_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
+        ];
+
+        self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));
+    }
+
+    public function testCreationFromPHPFile()
+    {
+        $options = [
+            'connection' => [
+                'server' => 'mongodb://localhost:27017',
+            ],
+            'php_paths' => [dirname(__DIR__) . '/files/fakeAnnotationFile.php'],
         ];
 
         self::assertInstanceOf('\Doctrine\ODM\MongoDB\DocumentManager', DocumentManagerBuilder::build($options));

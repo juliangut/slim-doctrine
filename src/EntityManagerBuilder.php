@@ -9,8 +9,6 @@
 
 namespace Jgut\Slim\Doctrine;
 
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
@@ -21,13 +19,16 @@ use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\Mapping\QuoteStrategy;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
+use Doctrine\ORM\Mapping\Driver\YamlDriver;
 
 /**
  * Doctrine Entity Manager service builder
  */
 class EntityManagerBuilder
 {
+    use ObjectManagerTrait;
+
     /**
      * Default configuration options.
      *
@@ -36,6 +37,7 @@ class EntityManagerBuilder
     protected static $defaultOptions = [
         'connection' => null,
         'cache_driver' => null,
+        'cache_namespace' => null,
         'annotation_files' => [],
         'annotation_namespaces' => [],
         'annotation_autoloaders' => [],
@@ -46,7 +48,7 @@ class EntityManagerBuilder
         'naming_strategy' => null,
         'quote_strategy' => null,
         'proxy_path' => null,
-        'proxies_namespace' => null,
+        'proxies_namespace' => 'DoctrineORMProxy',
         'auto_generate_proxies' => AbstractProxyFactory::AUTOGENERATE_NEVER,
         'sql_logger' => null,
         'event_manager' => null,
@@ -61,7 +63,10 @@ class EntityManagerBuilder
      *
      * @param array $options
      *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      *
      * @return \Doctrine\ORM\EntityManager
      */
@@ -69,114 +74,89 @@ class EntityManagerBuilder
     {
         $options = array_merge(static::$defaultOptions, $options);
 
-        if ($options['cache_driver'] !== null && !$options['cache_driver'] instanceof Cache) {
-            throw new \InvalidArgumentException('Cache Driver provided is not valid');
-        }
-
         static::setupAnnotationMetadata($options);
 
-        $config = static::createConfiguration($options);
-        if (!$config instanceof Configuration) {
-            throw new \InvalidArgumentException('No Metadata Driver defined');
-        }
-
+        $config = static::getConfiguration($options);
+        static::setMetadataDriver($config, $options);
         static::setupNamingStrategy($config, $options);
-
         static::setupQuoteStrategy($config, $options);
-
         static::setupProxy($config, $options);
-
         static::setupSQLLogger($config, $options);
-
         static::setupCustomDQLFunctions($config, $options);
 
-        $entityManager = EntityManager::create($options['connection'], $config, $options['event_manager']);
-        $connection = $entityManager->getConnection();
+        $entityManager = EntityManager::create(
+            $options['connection'],
+            $config,
+            $options['event_manager']
+        );
 
+        $connection = $entityManager->getConnection();
         static::setupCustomDBALTypes($connection, $options);
 
         return $entityManager;
     }
 
     /**
-     * Set up annotation metadata.
+     * Create Doctrine ORM bare configuration.
      *
      * @param array $options
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return \Doctrine\ORM\Configuration
      */
-    protected static function setupAnnotationMetadata(array $options)
+    protected static function getConfiguration(array $options)
     {
-        foreach ($options['annotation_files'] as $file) {
-            AnnotationRegistry::registerFile($file);
-        }
+        $cacheDriver = static::getCacheDriver(
+            $options['cache_driver'],
+            $options['cache_namespace'] ?: 'orm_dc2_' . sha1($options['proxy_path'] ?: sys_get_temp_dir()) . '_'
+        );
 
-        AnnotationRegistry::registerAutoloadNamespaces($options['annotation_namespaces']);
+        $config = new Configuration();
+        $config->setMetadataCacheImpl($cacheDriver);
+        $config->setQueryCacheImpl($cacheDriver);
+        $config->setResultCacheImpl($cacheDriver);
 
-        foreach ($options['annotation_autoloaders'] as $autoloader) {
-            AnnotationRegistry::registerLoader($autoloader);
-        }
+        return $config;
     }
 
     /**
      * Create Doctrine configuration.
      *
-     * @param array $options
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
      *
-     * @return \Doctrine\ORM\Configuration|null
+     * @throws \RuntimeException
      */
-    protected static function createConfiguration(array $options)
+    protected static function setMetadataDriver(Configuration $config, array $options)
     {
         if ($options['annotation_paths']) {
-            return Setup::createAnnotationMetadataConfiguration(
-                static::normalizePaths($options['annotation_paths']),
-                false,
-                $options['proxy_path'],
-                $options['cache_driver'],
-                false
+            $config->setMetadataDriverImpl(
+                $config->newDefaultAnnotationDriver((array) $options['annotation_paths'], false)
             );
+
+            return;
         }
 
         if ($options['xml_paths']) {
-            return Setup::createXMLMetadataConfiguration(
-                static::normalizePaths($options['xml_paths']),
-                false,
-                $options['proxy_path'],
-                $options['cache_driver']
-            );
+            $config->setMetadataDriverImpl(new XmlDriver((array) $options['xml_paths']));
+
+            return;
         }
 
         if ($options['yaml_paths']) {
-            return Setup::createYAMLMetadataConfiguration(
-                static::normalizePaths($options['yaml_paths']),
-                false,
-                $options['proxy_path'],
-                $options['cache_driver']
-            );
+            $config->setMetadataDriverImpl(new YamlDriver((array) $options['yaml_paths']));
+
+            return;
         }
 
         if ($options['php_paths']) {
-            $config = Setup::createConfiguration(
-                false,
-                $options['proxy_path'],
-                $options['cache_driver']
-            );
-            $config->setMetadataDriverImpl(new StaticPHPDriver(static::normalizePaths($options['php_paths'])));
+            $config->setMetadataDriverImpl(new StaticPHPDriver((array) $options['php_paths']));
 
-            return $config;
+            return;
         }
 
-        return null;
-    }
-
-    /**
-     * Normalize paths to array.
-     *
-     * @param array|string $paths
-     *
-     * @return array
-     */
-    protected static function normalizePaths($paths)
-    {
-        return is_array($paths) ? $paths : [$paths];
+        throw new \RuntimeException('No Metadata Driver defined');
     }
 
     /**
@@ -187,7 +167,7 @@ class EntityManagerBuilder
      *
      * @throws \InvalidArgumentException
      */
-    protected static function setupNamingStrategy(Configuration &$config, array $options)
+    protected static function setupNamingStrategy(Configuration $config, array $options)
     {
         $namingStrategy = $options['naming_strategy'] ?: new UnderscoreNamingStrategy(CASE_LOWER);
         if (!$namingStrategy instanceof NamingStrategy) {
@@ -205,7 +185,7 @@ class EntityManagerBuilder
      *
      * @throws \InvalidArgumentException
      */
-    protected static function setupQuoteStrategy(Configuration &$config, array $options)
+    protected static function setupQuoteStrategy(Configuration $config, array $options)
     {
         $quoteStrategy = $options['quote_strategy'] ?: new DefaultQuoteStrategy();
         if (!$quoteStrategy instanceof QuoteStrategy) {
@@ -216,26 +196,12 @@ class EntityManagerBuilder
     }
 
     /**
-     * Setup proxies.
-     *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
-     */
-    protected static function setupProxy(Configuration &$config, array $options)
-    {
-        $proxiesNamespace = $options['proxies_namespace'] ? $options['proxies_namespace'] : 'DoctrineORMProxy';
-        $config->setProxyNamespace((string) $proxiesNamespace);
-
-        $config->setAutoGenerateProxyClasses((int) $options['auto_generate_proxies']);
-    }
-
-    /**
      * Setup SQL logger.
      *
      * @param \Doctrine\ORM\Configuration $config
      * @param array                       $options
      */
-    protected static function setupSQLLogger(Configuration &$config, array $options)
+    protected static function setupSQLLogger(Configuration $config, array $options)
     {
         if ($options['sql_logger']) {
             $config->setSQLLogger($options['sql_logger']);
@@ -248,7 +214,7 @@ class EntityManagerBuilder
      * @param \Doctrine\ORM\Configuration $config
      * @param array                       $options
      */
-    protected static function setupCustomDQLFunctions(Configuration &$config, array $options)
+    protected static function setupCustomDQLFunctions(Configuration $config, array $options)
     {
         $config->setCustomStringFunctions($options['string_functions']);
 
@@ -262,12 +228,21 @@ class EntityManagerBuilder
      *
      * @param \Doctrine\DBAL\Connection $connection
      * @param array                     $options
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \RuntimeException
      */
-    protected static function setupCustomDBALTypes(Connection &$connection, array $options)
+    protected static function setupCustomDBALTypes(Connection $connection, array $options)
     {
-        foreach ($options['custom_types'] as $name => $class) {
-            Type::addType($name, $class);
-            $connection->getDatabasePlatform()->registerDoctrineTypeMapping($name, $name);
+        $platform = $connection->getDatabasePlatform();
+
+        foreach ($options['custom_types'] as $type => $class) {
+            if (Type::hasType($type)) {
+                throw new \RuntimeException(sprintf('Type "%s" is already registered', $type));
+            }
+
+            Type::addType($type, $class);
+            $platform->registerDoctrineTypeMapping($type, $type);
         }
     }
 }

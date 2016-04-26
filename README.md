@@ -95,6 +95,7 @@ $app->get('/', function () {
 
 * `connection` array of PDO configurations or \Doctrine\DBAL\Connection
 * `cache_driver` \Doctrine\Common\Cache\Cache
+* `cache_namespace` string for cache namespace
 * `annotation_files` array of Doctrine annotations files
 * `annotation_namespaces` array of Doctrine annotations namespaces
 * `annotation_autoloaders` array of Doctrine annotations autoloader callables
@@ -118,18 +119,21 @@ $app->get('/', function () {
 
 * `connection` array of MongoClient configurations or \Doctrine\MongoDB\Connection
 * `cache_driver` \Doctrine\Common\Cache\Cache
+* `cache_namespace` string for cache namespace
 * `annotation_files` array of Doctrine annotations files
 * `annotation_namespaces` array of Doctrine annotations namespaces
 * `annotation_autoloaders` array of Doctrine annotations autoloader callables
 * `annotation_paths` array of paths where to find annotated document files
 * `xml_paths` array of paths where to find XML document mapping files
 * `yaml_paths` array of paths where to find YAML document mapping files
+* `php_paths` array of paths where to find PHP document mapping files
 * `default_database` default database to be used in case none specified
 * `proxy_path` path where Doctrine creates its proxy classes, defaults to /tmp
 * `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxy'
 * `auto_generate_proxies` integer indicating proxy auto generation behavior
 * `hydrator_path` path where Doctrine creates its hydrator classes, defaults to /tmp
 * `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrator'
+* `auto_generate_hydrators` integer indicating hydrators auto generation behavior
 * `logger_callable` valid callable
 * `event_manager` a configured `Doctrine\Common\EventManager`
 
@@ -145,7 +149,7 @@ These are general considerations when configuring both Entity and Document manag
 
 * `auto_generate_proxies` configuration values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, in both cases it defaults to `Doctrine\Common\Proxy\AbstractProxyFactory::AUTOGENERATE_NEVER` (0).
 
-* Managers are being configured **ready for production** and not for development, this mainly means proxies won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` or finally fall back to `ArrayCache` which is always available. It is recommended you provide your cache always, for development you can use `VoidCache`.
+* Managers are being configured **ready for production**, this mainly means proxies and hydrators won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` and finally fallback to `ArrayCache` which is always available. It is recommended you always provide your cache provider, for development you should use `VoidCache`.
 
 ## CLI tool
 
