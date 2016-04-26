@@ -78,7 +78,7 @@ class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
             'hydrators_namespace' => 'myNamespace\Hydrators',
             'logger_callable' => function () {
             },
-            'event_manager' => new EventManager()
+            'event_manager' => new EventManager(),
         ];
 
         DocumentManagerBuilder::build($options);
