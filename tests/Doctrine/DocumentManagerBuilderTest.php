@@ -14,9 +14,6 @@ use Doctrine\MongoDB\Connection;
 use Jgut\Slim\Doctrine\DocumentManagerBuilder;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 
-/**
- * @covers Jgut\Slim\Doctrine\DocumentManagerBuilder
- */
 class DocumentManagerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**

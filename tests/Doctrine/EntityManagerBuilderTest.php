@@ -12,9 +12,6 @@ namespace Jgut\Slim\Doctrine\Tests;
 use Jgut\Slim\Doctrine\EntityManagerBuilder;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 
-/**
- * @covers Jgut\Slim\Doctrine\EntityManagerBuilder
- */
 class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -137,7 +134,7 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
         self::assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
     }
 
-    public function testCustomTypes()
+    public function testCustomType()
     {
         $options = [
             'connection' => [
@@ -147,6 +144,25 @@ class EntityManagerBuilderTest extends \PHPUnit_Framework_TestCase
             'annotation_paths' => sys_get_temp_dir(),
             'custom_types' => [
                 'custom' => '\Doctrine\DBAL\Types\DecimalType',
+            ],
+        ];
+
+        self::assertInstanceOf('\Doctrine\ORM\EntityManager', EntityManagerBuilder::build($options));
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testDuplicatedType()
+    {
+        $options = [
+            'connection' => [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ],
+            'annotation_paths' => sys_get_temp_dir(),
+            'custom_types' => [
+                'integer' => '\Doctrine\DBAL\Types\DecimalType',
             ],
         ];
 
