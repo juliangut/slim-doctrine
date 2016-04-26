@@ -152,42 +152,26 @@ These are general considerations when configuring both Entity and Document manag
 
 * Managers are being configured **ready for production**, this mainly means proxies and hydrators won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` and finally fallback to `ArrayCache` which is always available. It is recommended you always provide your cache provider, for development you should use `VoidCache`.
 
-## CLI tool
+## CLI Application builder
 
-Find here an example of `cli-config.php` file that can be used as a template:
+The easiest way to create `cli-config.php` for Doctrine CLI command runner
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
-use Doctrine\ORM\Tools\Console\ConsoleRunner;
-use Jgut\Slim\Doctrine\DocumentManagerBuilder;
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
+use Jgut\Slim\Doctrine\CLIApplicationBuilder;
 
 $CLISettings = [
     'cache_driver' => new VoidCache,
 ];
 $settings = require 'configurations.php';
 
-$entityManager = EntityManagerBuilder::build(array_merge($settings['entity_manager'], $CLISettings));
-$documentManager = DocumentManagerBuilder::build(array_merge($settings['document_manager'], $CLISettings));
+$application = CLIApplication::build(
+    array_merge($settings['entity_manager'], $CLISettings),
+    array_merge($settings['document_manager'], $CLISettings)
+);
 
-$helperSet = ConsoleRunner::createHelperSet($entityManager);
-$helperSet->set(new DocumentManagerHelper($documentManager), 'dm');
-
-$cli = ConsoleRunner::createApplication($helperSet, [
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateDocumentsCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateHydratorsCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateProxiesCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateRepositoriesCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\QueryCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\ClearCache\MetadataCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\CreateCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\DropCommand(),
-    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\UpdateCommand(),
-]);
-
-return $cli->run();
+return $application->run();
 ```
 
 ## Contributing
