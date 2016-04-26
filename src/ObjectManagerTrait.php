@@ -16,7 +16,6 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Cache\XcacheCache;
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 
 /**
  * Doctrine Object Manager commons.
@@ -84,22 +83,6 @@ trait ObjectManagerTrait
         foreach ($options['annotation_autoloaders'] as $autoLoader) {
             AnnotationRegistry::registerLoader($autoLoader);
         }
-    }
-
-    /**
-     * Create Doctrine ODM configuration.
-     *
-     * @param \Doctrine\ORM\Configuration|\Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                                                           $options
-     *
-     * @throws \RuntimeException
-     */
-    protected static function setupMetadataDriver($config, array $options)
-    {
-        $metadataDriver = new MappingDriverChain;
-        $metadataDriver->setDefaultDriver(self::getMetadataDriver($options));
-
-        $config->setMetadataDriverImpl($metadataDriver);
     }
 
     /**

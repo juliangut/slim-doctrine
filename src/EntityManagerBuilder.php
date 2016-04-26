@@ -10,6 +10,7 @@
 namespace Jgut\Slim\Doctrine;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\DBAL\Connection;
@@ -123,15 +124,35 @@ class EntityManagerBuilder
     }
 
     /**
-     * @param array $options
+     * Create Doctrine ODM configuration.
+     *
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
+     *
+     * @throws \RuntimeException
+     */
+    protected static function setupMetadataDriver(Configuration $config, array $options)
+    {
+        $metadataDriver = new MappingDriverChain;
+        $metadataDriver->setDefaultDriver(self::getMetadataDriver($config, $options));
+
+        $config->setMetadataDriverImpl($metadataDriver);
+    }
+
+    /**
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
      *
      * @throws \RuntimeException
      *
      * @return \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver
      */
-    protected static function getMetadataDriver(array $options)
+    protected static function getMetadataDriver(Configuration $config, array $options)
     {
         if ($options['annotation_paths']) {
+            // Only to register ORM annotations mapping
+            $config->newDefaultAnnotationDriver();
+
             return new AnnotationDriver(new AnnotationReader, (array) $options['annotation_paths']);
         }
 

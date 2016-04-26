@@ -10,6 +10,7 @@
 namespace Jgut\Slim\Doctrine;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\MongoDB\Connection;
@@ -104,6 +105,22 @@ class DocumentManagerBuilder
         $config->setMetadataCacheImpl($cacheDriver);
 
         return $config;
+    }
+
+    /**
+     * Create Doctrine ODM configuration.
+     *
+     * @param \Doctrine\ODM\MongoDB\Configuration $config
+     * @param array                               $options
+     *
+     * @throws \RuntimeException
+     */
+    protected static function setupMetadataDriver(Configuration $config, array $options)
+    {
+        $metadataDriver = new MappingDriverChain;
+        $metadataDriver->setDefaultDriver(self::getMetadataDriver($options));
+
+        $config->setMetadataDriverImpl($metadataDriver);
     }
 
     /**
