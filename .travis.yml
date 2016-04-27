@@ -18,8 +18,8 @@ services:
   - mongodb
 
 before_script:
-  - if [[ "$TRAVIS_PHP_VERSION" == '7.0' ]]; then pecl -q install mongo ; fi
-  - if [[ "$TRAVIS_PHP_VERSION" != '7.0' ]]; then echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini ; fi
+  - pecl -q install mongodb
+  - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction --prefer-source
   - if [[ "$TRAVIS_PHP_VERSION" == '5.6' ]]; then travis_retry composer require satooshi/php-coveralls:dev-master --no-interaction ; fi
