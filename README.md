@@ -182,9 +182,7 @@ See file [CONTRIBUTING.md](https://github.com/juliangut/slim-doctrine/blob/maste
 
 ### Contributors
 
-* [@fousheezy (John Foushee)](https://github.com/fousheezy)
 * [@mcrauwel (Matthias Crauwels)](https://github.com/mcrauwel)
-* [@mgersten (Micah Gersten)](https://github.com/mgersten)
 
 ## License
 

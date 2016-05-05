@@ -60,7 +60,9 @@ trait ObjectManagerTrait
             throw new \InvalidArgumentException('Cache Driver provided is not valid');
         }
 
-        $cacheDriver->setNamespace(trim($cacheNamespace) !== '' ? trim($cacheNamespace) : 'dc2_' . sha1(time()) . '_');
+        $cacheDriver->setNamespace(
+            trim($cacheNamespace) !== '' ? trim($cacheNamespace) : 'dc2_' . sha1(sys_get_temp_dir()) . '_'
+        );
 
         return $cacheDriver;
     }
