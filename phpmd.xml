@@ -78,7 +78,7 @@
     <!-- Controversial rules -->
     <!-- <rule ref="rulesets/controversial.xml" /> -->
     <!-- Avoid superglobals -->
-    <!-- <rule ref="rulesets/controversial.xml/Superglobals" /> -->
+    <rule ref="rulesets/controversial.xml/Superglobals" />
     <!-- Use camelCase class name-->
     <rule ref="rulesets/controversial.xml/CamelCaseClassName" />
     <!-- Use camelCase class attribute names -->
@@ -88,7 +88,7 @@
     <!-- Use camelCase class method parameter names -->
     <rule ref="rulesets/controversial.xml/CamelCaseParameterName" />
     <!-- Use camelCase class method variable names -->
-    <!-- <rule ref="rulesets/controversial.xml/CamelCaseVariableName" /> -->
+    <rule ref="rulesets/controversial.xml/CamelCaseVariableName" />
 
     <!-- Code size rules -->
     <!-- <rule ref="rulesets/codesize.xml" /> -->

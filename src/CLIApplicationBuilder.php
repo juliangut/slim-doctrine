@@ -10,6 +10,15 @@
 namespace Jgut\Slim\Doctrine;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\ClearCache\MetadataCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateDocumentsCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateHydratorsCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateProxiesCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateRepositoriesCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\QueryCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\CreateCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\DropCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\UpdateCommand;
 use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
@@ -22,14 +31,14 @@ class CLIApplicationBuilder
     /**
      * Create a Doctrine CLI application.
      *
-     * @param array|\Doctrine\ORM\EntityManager           $entityManager
-     * @param array|\Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param array|\Doctrine\ORM\EntityManager                $entityManager
+     * @param array|\Doctrine\ODM\MongoDB\DocumentManager|null $documentManager
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \InvalidArgumentException
-     * @throws \LogicException
      * @throws \RuntimeException
+     * @throws \Symfony\Component\Console\Exception\LogicException
      *
      * @return \Symfony\Component\Console\Application
      */
@@ -47,15 +56,15 @@ class CLIApplicationBuilder
 
             $application->addCommands(
                 [
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateDocumentsCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateHydratorsCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateProxiesCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateRepositoriesCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\QueryCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\ClearCache\MetadataCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\CreateCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\DropCommand(),
-                    new \Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\UpdateCommand(),
+                    new GenerateDocumentsCommand,
+                    new GenerateHydratorsCommand,
+                    new GenerateProxiesCommand,
+                    new GenerateRepositoriesCommand,
+                    new QueryCommand,
+                    new MetadataCommand,
+                    new CreateCommand,
+                    new DropCommand,
+                    new UpdateCommand,
                 ]
             );
         }
@@ -68,7 +77,10 @@ class CLIApplicationBuilder
      *
      * @param array|\Doctrine\ORM\EntityManager $entityManager
      *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      *
      * @return \Doctrine\ORM\EntityManager
      */
@@ -91,6 +103,7 @@ class CLIApplicationBuilder
      * @param array|\Doctrine\ODM\MongoDB\DocumentManager $documentManager
      *
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      *
      * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
