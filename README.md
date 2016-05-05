@@ -8,11 +8,11 @@
 [![Code Coverage](https://img.shields.io/coveralls/juliangut/slim-doctrine.svg?style=flat-square)](https://coveralls.io/github/juliangut/slim-doctrine)
 [![Total Downloads](https://img.shields.io/packagist/dt/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 
-# Slim3 Doctrine integration
+# Doctrine managers building
 
-Doctrine handler service for Slim3.
+Frees you from the tedious work of configuring Doctrine's Entity Manager and MongoDB Document Manager.
 
-Frees you from the tedious work of configuring Doctrine's Entity Manager and Document Manager.
+> Even though the package was meant for Slim3 integration it can actually be used separately to build Doctrine Managers for any kind of project.
 
 ## Installation
 
@@ -30,6 +30,32 @@ require_once './vendor/autoload.php';
 
 ## Usage
 
+### Standalone
+
+```php
+use Jgut\Slim\Doctrine\DocumentManagerBuilder;
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
+
+$entityManagerSettings = [
+    'connection' => [
+        'driver' => 'pdo_sqlite',
+        'memory' => true,
+    ],
+    'annotation_paths' => ['path_to_entities_files'],
+];
+$entityManager = EntityManagerBuilder::build($entityManagerSettings);
+
+$documentManagerSettings = [
+    'connection' => [
+        'server' => 'mongodb://localhost:27017',
+    ],
+    'annotation_paths' => ['path_to_documents_files'],
+]
+$documentManager = DocumentManagerBuilder::build($documentManagerSettings);
+```
+
+### In Slim3
+
 Register in the DI container as any other service.
 
 ```php
@@ -42,7 +68,7 @@ $container = $app->getContainer();
 
 // Register Entity Manager in the container
 $container['entityManager'] = function () {
-    $doctrineORMSettings = [
+    $entityManagerSettings = [
         'connection' => [
             'driver' => 'pdo_sqlite',
             'memory' => true,
@@ -50,7 +76,7 @@ $container['entityManager'] = function () {
         'annotation_paths' => ['path_to_entities_files'],
     ];
 
-    return EntityManagerBuilder::build($doctrineORMSettings);
+    return EntityManagerBuilder::build($entityManagerSettings);
 };
 
 $app->get('/', function () {
@@ -59,7 +85,7 @@ $app->get('/', function () {
 });
 ```
 
-You can use Slim settings service to store Doctrine configurations.
+You can use Slim3 settings service to store Doctrine configurations.
 
 ```php
 use Jgut\Slim\Doctrine\DocumentManagerBuilder;
@@ -68,7 +94,7 @@ use Slim\App;
 
 $settings = [
     'settings' => [
-        'doctrine_odm' => [
+        'document_manager' => [
             'connection' => [
                 'server' => 'mongodb://localhost:27017',
             ],
@@ -83,7 +109,7 @@ $container = $app->getContainer();
 
 // Register Document Manager in the container
 $container['documentManager'] = function (ContainerInterface $container) {
-    return DocumentManagerBuilder::build($container->get('settings')['doctrine_odm']);
+    return DocumentManagerBuilder::build($container->get('settings')['document_manager']);
 };
 
 $app->get('/', function () {
