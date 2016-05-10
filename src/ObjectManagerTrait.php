@@ -16,6 +16,8 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Cache\XcacheCache;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 
 /**
  * Doctrine Object Manager commons.
@@ -87,6 +89,22 @@ trait ObjectManagerTrait
         }
 
         AnnotationRegistry::registerLoader('class_exists');
+    }
+
+    /**
+     * Setup metadata driver.
+     *
+     * @param \Doctrine\ORM\Configuration|\Doctrine\ODM\MongoDB\Configuration $config
+     * @param \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver       $driver
+     *
+     * @throws \RuntimeException
+     */
+    protected static function setupMetadataDriver($config, MappingDriver $driver)
+    {
+        $metadataDriver = new MappingDriverChain;
+        $metadataDriver->setDefaultDriver($driver);
+
+        $config->setMetadataDriverImpl($metadataDriver);
     }
 
     /**

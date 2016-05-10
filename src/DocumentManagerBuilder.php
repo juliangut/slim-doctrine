@@ -10,7 +10,6 @@
 namespace Jgut\Slim\Doctrine;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\MongoDB\Connection;
@@ -71,7 +70,7 @@ class DocumentManagerBuilder
         static::setupAnnotationMetadata($options);
 
         $config = static::getConfiguration($options);
-        static::setupMetadataDriver($config, $options);
+        static::setupMetadataDriver($config, self::getMetadataDriver($options));
         static::setupDefaultDatabase($config, $options);
         static::setupProxy($config, $options);
         static::setupHydrator($config, $options);
@@ -107,22 +106,8 @@ class DocumentManagerBuilder
     }
 
     /**
-     * Create Doctrine ODM configuration.
+     * Create metadata driver.
      *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
-     *
-     * @throws \RuntimeException
-     */
-    protected static function setupMetadataDriver(Configuration $config, array $options)
-    {
-        $metadataDriver = new MappingDriverChain;
-        $metadataDriver->setDefaultDriver(self::getMetadataDriver($options));
-
-        $config->setMetadataDriverImpl($metadataDriver);
-    }
-
-    /**
      * @param array $options
      *
      * @throws \RuntimeException
