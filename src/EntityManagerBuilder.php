@@ -134,20 +134,19 @@ class EntityManagerBuilder
     protected static function setupMetadataDriver(Configuration $config, array $options)
     {
         $metadataDriver = new MappingDriverChain;
-        $metadataDriver->setDefaultDriver(self::getMetadataDriver($config, $options));
+        $metadataDriver->setDefaultDriver(self::getMetadataDriver($options));
 
         $config->setMetadataDriverImpl($metadataDriver);
     }
 
     /**
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param array $options
      *
      * @throws \RuntimeException
      *
      * @return \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver
      */
-    protected static function getMetadataDriver(Configuration $config, array $options)
+    protected static function getMetadataDriver(array $options)
     {
         if ($options['annotation_paths']) {
             return new AnnotationDriver(new AnnotationReader, (array) $options['annotation_paths']);
