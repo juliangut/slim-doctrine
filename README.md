@@ -164,7 +164,7 @@ $app->get('/', function () {
 * `logger_callable` valid callable
 * `event_manager` a configured `Doctrine\Common\EventManager`
 
-## Considerations
+### Considerations
 
 These are general considerations when configuring both Entity and Document managers:
 
@@ -177,6 +177,64 @@ These are general considerations when configuring both Entity and Document manag
 * `auto_generate_proxies` configuration values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, in both cases it defaults to `Doctrine\Common\Proxy\AbstractProxyFactory::AUTOGENERATE_NEVER` (0).
 
 * Managers are being configured **ready for production**, this mainly means proxies and hydrators won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` and finally fallback to `ArrayCache` which is always available. It is recommended you always provide your cache provider, for development you should use `VoidCache`.
+
+## Extending managers
+
+Extending managers with custom types or custom mappings is really simple, here you'll find an example using two well known libraries.
+
+### [ramsey/doctrine-uuid](https://github.com/ramsey/uuid-doctrine)
+
+```
+composer require ramsey/doctrine-uuid
+```
+
+```php
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
+use Ramsey\Uuid\Doctrine\UuidType
+
+$entityManagerSettings = [
+    'connection' => [
+        'driver' => 'pdo_sqlite',
+        'memory' => true,
+    ],
+    'annotation_paths' => ['path_to_entities_files'],
+    'custom_types' => ['uuid' => UuidType::class]
+];
+
+$entityManager = EntityManagerBuilder::build($entityManagerSettings);
+```
+
+### [gedmo/doctrine-extensions](https://github.com/Atlantic18/DoctrineExtensions)
+
+```
+composer require gedmo/doctrine-extensions
+```
+
+```php
+use Doctrine\Common\EventManager;
+use Gedmo\DoctrineExtensions
+use Gedmo\Sluggable\SluggableListener;
+use Gedmo\Timestampable\TimestampableListener;
+use Jgut\Slim\Doctrine\EntityManagerBuilder;
+
+$eventManager = new EventManager;
+$eventManager->addEventSubscriber(new SluggableListener);
+$eventManager->addEventSubscriber(new TimestampableListener);
+
+$entityManagerSettings = [
+    'connection' => [
+        'driver' => 'pdo_sqlite',
+        'memory' => true,
+    ],
+    'annotation_paths' => ['path_to_entities_files'],
+    'event_manager' => $eventManager
+];
+
+$entityManager = EntityManagerBuilder::build($entityManagerSettings);
+DoctrineExtensions::registerAbstractMappingIntoDriverChainORM(
+    $entityManager->getConfiguration()->getMetadataDriverImpl()
+);
+```
 
 ## CLI Application builder
 
