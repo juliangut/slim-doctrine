@@ -68,7 +68,6 @@ class DocumentManagerBuilder
     {
         $options = array_merge(static::$defaultOptions, $options);
 
-        AnnotationDriver::registerAnnotationClasses();
         static::setupAnnotationMetadata($options);
 
         $config = static::getConfiguration($options);

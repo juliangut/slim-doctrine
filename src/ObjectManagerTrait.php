@@ -85,6 +85,8 @@ trait ObjectManagerTrait
         foreach ($options['annotation_autoloaders'] as $autoLoader) {
             AnnotationRegistry::registerLoader($autoLoader);
         }
+
+        AnnotationRegistry::registerLoader('class_exists');
     }
 
     /**

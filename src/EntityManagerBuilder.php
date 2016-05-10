@@ -150,9 +150,6 @@ class EntityManagerBuilder
     protected static function getMetadataDriver(Configuration $config, array $options)
     {
         if ($options['annotation_paths']) {
-            // Only to register ORM annotations mapping
-            $config->newDefaultAnnotationDriver();
-
             return new AnnotationDriver(new AnnotationReader, (array) $options['annotation_paths']);
         }
 

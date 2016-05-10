@@ -142,7 +142,7 @@ $app->get('/', function () {
 * `numeric_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
 * `datetime_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
 
-### ODM Document Manager configurations
+### Mongo ODM Document Manager configurations
 
 * `connection` array of MongoClient configurations or \Doctrine\MongoDB\Connection
 * `cache_driver` \Doctrine\Common\Cache\Cache
