@@ -9,19 +9,14 @@
 
 namespace Jgut\Slim\Doctrine;
 
+use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
 use Doctrine\ODM\MongoDB\DocumentManager;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\ClearCache\MetadataCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateDocumentsCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateHydratorsCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateProxiesCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\GenerateRepositoriesCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\QueryCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\CreateCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\DropCommand;
-use Doctrine\ODM\MongoDB\Tools\Console\Command\Schema\UpdateCommand;
+use Doctrine\ODM\MongoDB\Tools\Console\Command as ODMCommand;
 use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Symfony\Component\Console\Helper\HelperSet;
 
 /**
  * Doctrine CLI application builder.
@@ -31,8 +26,8 @@ class CLIApplicationBuilder
     /**
      * Create a Doctrine CLI application.
      *
-     * @param array|\Doctrine\ORM\EntityManager                $entityManager
-     * @param array|\Doctrine\ODM\MongoDB\DocumentManager|null $documentManager
+     * @param array|EntityManager|null   $entityManager
+     * @param array|DocumentManager|null $documentManager
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -42,29 +37,45 @@ class CLIApplicationBuilder
      *
      * @return \Symfony\Component\Console\Application
      */
-    public static function build($entityManager, $documentManager = null)
+    public static function build($entityManager = null, $documentManager = null)
     {
-        $entityManager = self::getEntityManager($entityManager);
+        if ($entityManager === null && $documentManager === null) {
+            throw new \InvalidArgumentException('At least one of EntityManager or DocumentManager must be provided');
+        }
 
-        $helperSet = ConsoleRunner::createHelperSet($entityManager);
-        $application = ConsoleRunner::createApplication($helperSet);
+        if ($entityManager !== null) {
+            $entityManager = static::getEntityManager($entityManager);
+        }
 
         if ($documentManager !== null) {
-            $documentManager = self::getDocumentManager($documentManager);
+            $documentManager = static::getDocumentManager($documentManager);
+        }
 
+        $helperSet = new HelperSet;
+
+        if ($entityManager instanceof EntityManager) {
+            $helperSet->set(new ConnectionHelper($entityManager->getConnection()), 'db');
+            $helperSet->set(new EntityManagerHelper($entityManager), 'em');
+        }
+
+        if ($documentManager instanceof DocumentManager) {
             $helperSet->set(new DocumentManagerHelper($documentManager), 'dm');
+        }
 
+        $application = ConsoleRunner::createApplication($helperSet);
+
+        if ($documentManager instanceof DocumentManager) {
             $application->addCommands(
                 [
-                    new GenerateDocumentsCommand,
-                    new GenerateHydratorsCommand,
-                    new GenerateProxiesCommand,
-                    new GenerateRepositoriesCommand,
-                    new QueryCommand,
-                    new MetadataCommand,
-                    new CreateCommand,
-                    new DropCommand,
-                    new UpdateCommand,
+                    new ODMCommand\GenerateDocumentsCommand,
+                    new ODMCommand\GenerateHydratorsCommand,
+                    new ODMCommand\GenerateProxiesCommand,
+                    new ODMCommand\GenerateRepositoriesCommand,
+                    new ODMCommand\QueryCommand,
+                    new ODMCommand\ClearCache\MetadataCommand,
+                    new ODMCommand\Schema\CreateCommand,
+                    new ODMCommand\Schema\DropCommand,
+                    new ODMCommand\Schema\UpdateCommand,
                 ]
             );
         }
@@ -75,14 +86,14 @@ class CLIApplicationBuilder
     /**
      * Retrieve entity manager.
      *
-     * @param array|\Doctrine\ORM\EntityManager $entityManager
+     * @param array|EntityManager $entityManager
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return \Doctrine\ORM\EntityManager
+     * @return EntityManager
      */
     protected static function getEntityManager($entityManager)
     {
@@ -100,12 +111,12 @@ class CLIApplicationBuilder
     /**
      * Retrieve document manager.
      *
-     * @param array|\Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param array|DocumentManager $documentManager
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return \Doctrine\ODM\MongoDB\DocumentManager
+     * @return DocumentManager
      */
     protected static function getDocumentManager($documentManager)
     {

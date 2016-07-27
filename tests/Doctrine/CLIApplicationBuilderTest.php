@@ -19,12 +19,20 @@ class CLIApplicationBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testNoEntityManager()
+    public function testNoManagers()
+    {
+        CLIApplicationBuilder::build();
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testBadEntityManagers()
     {
         CLIApplicationBuilder::build('');
     }
 
-    public function testOnlyEntityManager()
+    public function testEntityManager()
     {
         $entityOptions = [
             'connection' => [
@@ -37,33 +45,19 @@ class CLIApplicationBuilderTest extends \PHPUnit_Framework_TestCase
         $application = CLIApplicationBuilder::build($entityOptions);
 
         self::assertInstanceOf('Symfony\Component\Console\Application', $application);
+        self::assertTrue($application->has('orm:schema-tool:create'));
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testNoDocumentManager()
+    public function testBadDocumentManagers()
     {
-        $entityOptions = [
-            'connection' => [
-                'driver' => 'pdo_sqlite',
-                'memory' => true,
-            ],
-            'annotation_paths' => sys_get_temp_dir(),
-        ];
-
-        CLIApplicationBuilder::build($entityOptions, '');
+        CLIApplicationBuilder::build(null, '');
     }
 
-    public function testBothManagers()
+    public function testDocumentManagers()
     {
-        $entityOptions = [
-            'connection' => [
-                'driver' => 'pdo_sqlite',
-                'memory' => true,
-            ],
-            'annotation_paths' => sys_get_temp_dir(),
-        ];
         $documentOptions = [
             'connection' => [
                 'server' => 'mongodb://localhost:27017',
@@ -71,7 +65,7 @@ class CLIApplicationBuilderTest extends \PHPUnit_Framework_TestCase
             'annotation_paths' => sys_get_temp_dir(),
         ];
 
-        $application = CLIApplicationBuilder::build($entityOptions, $documentOptions);
+        $application = CLIApplicationBuilder::build(null, $documentOptions);
 
         self::assertInstanceOf('Symfony\Component\Console\Application', $application);
         self::assertTrue($application->has('odm:generate:documents'));
