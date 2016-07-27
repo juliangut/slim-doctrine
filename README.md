@@ -182,15 +182,15 @@ These are general considerations when configuring both Entity and Document manag
 
 Extending managers with custom types or custom mappings is really simple, here you'll find an example using two well known libraries.
 
-### [ramsey/doctrine-uuid](https://github.com/ramsey/uuid-doctrine)
+### [ramsey/uuid-doctrine](https://github.com/ramsey/uuid-doctrine)
 
 ```
-composer require ramsey/doctrine-uuid
+composer require ramsey/uuid-doctrine
 ```
 
 ```php
 use Jgut\Slim\Doctrine\EntityManagerBuilder;
-use Ramsey\Uuid\Doctrine\UuidType
+use Ramsey\Uuid\Doctrine\UuidType;
 
 $entityManagerSettings = [
     'connection' => [
@@ -212,7 +212,7 @@ composer require gedmo/doctrine-extensions
 
 ```php
 use Doctrine\Common\EventManager;
-use Gedmo\DoctrineExtensions
+use Gedmo\DoctrineExtensions;
 use Gedmo\Sluggable\SluggableListener;
 use Gedmo\Timestampable\TimestampableListener;
 use Jgut\Slim\Doctrine\EntityManagerBuilder;

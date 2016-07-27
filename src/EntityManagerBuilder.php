@@ -70,7 +70,7 @@ class EntityManagerBuilder
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return \Doctrine\ORM\EntityManager
+     * @return EntityManager
      */
     public static function build(array $options)
     {
@@ -79,7 +79,7 @@ class EntityManagerBuilder
         static::setupAnnotationMetadata($options);
 
         $config = static::getConfiguration($options);
-        static::setupMetadataDriver($config, self::getMetadataDriver($options));
+        static::setupMetadataDriver($config, static::getMetadataDriver($options));
         static::setupNamingStrategy($config, $options);
         static::setupQuoteStrategy($config, $options);
         static::setupProxy($config, $options);
@@ -105,7 +105,7 @@ class EntityManagerBuilder
      *
      * @throws \InvalidArgumentException
      *
-     * @return \Doctrine\ORM\Configuration
+     * @return Configuration
      */
     protected static function getConfiguration(array $options)
     {
@@ -155,8 +155,8 @@ class EntityManagerBuilder
     /**
      * Setup naming strategy.
      *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param Configuration $config
+     * @param array         $options
      *
      * @throws \InvalidArgumentException
      */
@@ -173,8 +173,8 @@ class EntityManagerBuilder
     /**
      * Setup quote strategy.
      *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param Configuration $config
+     * @param array         $options
      *
      * @throws \InvalidArgumentException
      */
@@ -191,8 +191,8 @@ class EntityManagerBuilder
     /**
      * Setup SQL logger.
      *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param Configuration $config
+     * @param array         $options
      */
     protected static function setupSQLLogger(Configuration $config, array $options)
     {
@@ -204,8 +204,8 @@ class EntityManagerBuilder
     /**
      * Setup custom DQL functions.
      *
-     * @param \Doctrine\ORM\Configuration $config
-     * @param array                       $options
+     * @param Configuration $config
+     * @param array         $options
      */
     protected static function setupCustomDQLFunctions(Configuration $config, array $options)
     {
@@ -219,8 +219,8 @@ class EntityManagerBuilder
     /**
      * Setup Custom DBAL types.
      *
-     * @param \Doctrine\DBAL\Connection $connection
-     * @param array                     $options
+     * @param Connection $connection
+     * @param array      $options
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException

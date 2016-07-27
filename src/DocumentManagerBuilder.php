@@ -61,7 +61,7 @@ class DocumentManagerBuilder
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return \Doctrine\ODM\MongoDB\DocumentManager
+     * @return DocumentManager
      */
     public static function build(array $options)
     {
@@ -70,14 +70,14 @@ class DocumentManagerBuilder
         static::setupAnnotationMetadata($options);
 
         $config = static::getConfiguration($options);
-        static::setupMetadataDriver($config, self::getMetadataDriver($options));
+        static::setupMetadataDriver($config, static::getMetadataDriver($options));
         static::setupDefaultDatabase($config, $options);
         static::setupProxy($config, $options);
         static::setupHydrator($config, $options);
         static::setupLogger($config, $options);
 
         return DocumentManager::create(
-            self::getConnection($config, $options),
+            static::getConnection($config, $options),
             $config,
             $options['event_manager']
         );
@@ -90,7 +90,7 @@ class DocumentManagerBuilder
      *
      * @throws \InvalidArgumentException
      *
-     * @return \Doctrine\ODM\MongoDB\Configuration
+     * @return Configuration
      */
     protected static function getConfiguration(array $options)
     {
@@ -138,8 +138,8 @@ class DocumentManagerBuilder
     /**
      * Setup default database.
      *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
+     * @param Configuration $config
+     * @param array         $options
      */
     protected static function setupDefaultDatabase(Configuration $config, array $options)
     {
@@ -151,8 +151,8 @@ class DocumentManagerBuilder
     /**
      * Setup hydrators.
      *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
+     * @param Configuration $config
+     * @param array         $options
      */
     protected static function setupHydrator(Configuration $config, array $options)
     {
@@ -166,8 +166,8 @@ class DocumentManagerBuilder
     /**
      * Setup logger.
      *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
+     * @param Configuration $config
+     * @param array         $options
      */
     protected static function setupLogger(Configuration $config, array $options)
     {
@@ -179,13 +179,13 @@ class DocumentManagerBuilder
     /**
      * Create MongoDB Connection.
      *
-     * @param \Doctrine\ODM\MongoDB\Configuration $config
-     * @param array                               $options
+     * @param Configuration $config
+     * @param array         $options
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return \Doctrine\MongoDB\Connection
+     * @return Connection
      */
     protected static function getConnection(Configuration $config, array $options)
     {

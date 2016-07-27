@@ -25,12 +25,12 @@ use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 trait ObjectManagerTrait
 {
     /**
-     * @param \Doctrine\Common\Cache\CacheProvider|null $cacheDriver
-     * @param string                                    $cacheNamespace
+     * @param CacheProvider|null $cacheDriver
+     * @param string             $cacheNamespace
      *
      * @throws \InvalidArgumentException
      *
-     * @return \Doctrine\Common\Cache\CacheProvider
+     * @return CacheProvider
      */
     protected static function getCacheDriver($cacheDriver, $cacheNamespace)
     {
@@ -95,7 +95,7 @@ trait ObjectManagerTrait
      * Setup metadata driver.
      *
      * @param \Doctrine\ORM\Configuration|\Doctrine\ODM\MongoDB\Configuration $config
-     * @param \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver       $driver
+     * @param MappingDriver                                                   $driver
      *
      * @throws \RuntimeException
      */
