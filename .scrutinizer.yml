@@ -65,14 +65,14 @@ tools:
       paths: [src, tests]
   php_cpd:
     enabled: true
-    excluded_dirs: [build, tests, vendor]
+    excluded_dirs: [dist, tests, vendor]
   php_mess_detector:
     enabled: true
     config:
       ruleset: phpmd.xml
   php_loc:
     enabled: true
-    excluded_dirs: [build, tests, vendor]
+    excluded_dirs: [dist, tests, vendor]
   php_pdepend: true
   php_analyzer: true
   sensiolabs_security_checker: true

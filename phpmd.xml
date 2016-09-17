@@ -5,40 +5,24 @@
          xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
                         http://pmd.sf.net/ruleset_xml_schema.xsd"
          xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd"
-         name="Slim-Doctrine"
+         name="slim-doctrine"
 >
-    <description>Custom ruleset</description>
+    <description>slim-doctrine rule set</description>
 
     <!-- Unused code rules -->
     <!-- <rule ref="rulesets/unusedcode.xml" /> -->
     <!-- Unused private attributes -->
     <rule ref="rulesets/unusedcode.xml/UnusedPrivateField"/>
-    <!-- Unused private methods -->
-    <rule ref="rulesets/unusedcode.xml/UnusedPrivateMethod"/>
     <!-- Unused local variables -->
     <rule ref="rulesets/unusedcode.xml/UnusedLocalVariable"/>
+    <!-- Unused private methods -->
+    <rule ref="rulesets/unusedcode.xml/UnusedPrivateMethod"/>
     <!-- Unused method parameter -->
     <rule ref="rulesets/unusedcode.xml/UnusedFormalParameter"/>
 
     <!-- Naming rules -->
     <!-- <rule ref="rulesets/naming.xml" /> -->
-    <!-- Class constructors should be __construct -->
-    <rule ref="rulesets/naming.xml/ConstructorWithNameAsEnclosingClass" />
-    <!-- Uppercased class/interface constants -->
-    <rule ref="rulesets/naming.xml/ConstantNamingConventions"/>
-    <!-- Boolean method should be of the form isX() or hasX() -->
-    <rule ref="rulesets/naming.xml/BooleanGetMethodName">
-        <properties>
-            <property name="checkParameterizedMethods" value="true"/>
-        </properties>
-    </rule>
-    <!-- Method minimum length (3) -->
-    <rule ref="rulesets/naming.xml/ShortMethodName">
-        <properties>
-            <property name="minimum" value="3"/>
-        </properties>
-    </rule>
-    <!-- Variable minimum length (3), not for variables in for statements -->
+    <!-- Variable minimum length (3), not for variables in 'for' statements -->
     <rule ref="rulesets/naming.xml/ShortVariable">
         <properties>
             <property name="minimum" value="3"/>
@@ -48,6 +32,23 @@
     <rule ref="rulesets/naming.xml/LongVariable">
         <properties>
             <property name="maximum" value="20"/>
+        </properties>
+    </rule>
+    <!-- Method minimum length (3) -->
+    <rule ref="rulesets/naming.xml/ShortMethodName">
+        <properties>
+            <property name="minimum" value="3"/>
+        </properties>
+    </rule>
+    <!-- Class constructors should be __construct -->
+    <rule ref="rulesets/naming.xml/ConstructorWithNameAsEnclosingClass" />
+    <!-- Uppercase class/interface constants -->
+    <rule ref="rulesets/naming.xml/ConstantNamingConventions"/>
+    <!-- Boolean method should be of the form isX() or hasX() -->
+    <rule ref="rulesets/naming.xml/BooleanGetMethodName">
+        <properties>
+            <!-- Applies only to methods without parameter when set to true -->
+            <property name="checkParameterizedMethods" value="false"/>
         </properties>
     </rule>
 
@@ -67,7 +68,7 @@
     </rule>
     <!-- Excessive inheritance depth (6) -->
     <rule ref="rulesets/design.xml/DepthOfInheritance">
-    <properties>
+        <properties>
             <property name="minimum" value="6"/>
         </properties>
     </rule>
@@ -97,16 +98,22 @@
     <!-- <rule ref="rulesets/codesize.xml" /> -->
     <!-- Cyclomatic complexity: number of decision points in a method
         plus one for the method entry. 1-4 low, 5-7 moderate, 8-10 high,
-        11+ very high (threshold is 10) -->
+        11+ very high (10) -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
         <properties>
             <property name="reportLevel" value="10"/>
         </properties>
     </rule>
-    <!-- Acyclic execution paths on a method (threshold is 200) -->
+    <!-- Acyclic execution paths on a method (200) -->
     <rule ref="rulesets/codesize.xml/NPathComplexity">
         <properties>
             <property name="minimum" value="200"/>
+        </properties>
+    </rule>
+    <!-- Excessive method length (100) -->
+    <rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
+        <properties>
+            <property name="minimum" value="100" />
         </properties>
     </rule>
     <!-- Excessive class length (1000) -->
@@ -115,16 +122,16 @@
             <property name="minimum" value="1000"/>
         </properties>
     </rule>
-    <!-- Excessive method length (150) -->
-    <rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
-        <properties>
-            <property name="minimum" value="150" />
-        </properties>
-    </rule>
-    <!-- Excessive parameters list (8) -->
+    <!-- Excessive parameters list (10) -->
     <rule ref="rulesets/codesize.xml/ExcessiveParameterList">
         <properties>
-            <property name="minimum" value="8" />
+            <property name="minimum" value="10" />
+        </properties>
+    </rule>
+    <!-- Excessive number of public attributes and methods (45) -->
+    <rule ref="rulesets/codesize.xml/ExcessivePublicCount">
+        <properties>
+            <property name="minimum" value="45" />
         </properties>
     </rule>
     <!-- Excessive class attributes (15) -->
@@ -133,16 +140,22 @@
             <property name="maxfields" value="15"/>
         </properties>
     </rule>
-    <!-- Excessive class methods (20) -->
+    <!-- Excessive class methods (25) -->
     <rule ref="rulesets/codesize.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="20"/>
+            <property name="maxmethods" value="25"/>
         </properties>
     </rule>
-    <!-- Excessive WMC, time and effort to modify and maintain class (500) -->
+    <!-- Excessive number of public methods (10) -->
+    <rule ref="rulesets/codesize.xml/TooManyPublicMethods">
+        <properties>
+            <property name="minimum" value="10" />
+        </properties>
+    </rule>
+    <!-- Excessive WMC, time and effort to modify and maintain class (50) -->
     <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
         <properties>
-            <property name="maximum" value="500"/>
+            <property name="maximum" value="60"/>
         </properties>
     </rule>
 </ruleset>

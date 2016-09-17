@@ -2,5 +2,6 @@
 composer.lock
 composer.phar
 vendor/
-build/
 node_modules/
+.yo-rc.json
+dist/
