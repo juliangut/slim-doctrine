@@ -8,11 +8,15 @@
 [![Code Coverage](https://img.shields.io/coveralls/juliangut/slim-doctrine.svg?style=flat-square)](https://coveralls.io/github/juliangut/slim-doctrine)
 [![Total Downloads](https://img.shields.io/packagist/dt/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 
-# Doctrine managers building
+# Slim Doctrine managers integration
 
-Frees you from the tedious work of configuring Doctrine's Entity Manager and MongoDB Document Manager.
+Frees you from the tedious work of configuring and integrating Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
 
-> Even though the package was meant for Slim3 integration it can actually be used separately to build Doctrine Managers for any kind of project.
+## Important note
+
+This latest version of slim-doctrine is focused on Slim framework and Doctrine integration and thus using the manager builders as stand alone is not possible.
+
+For that head to [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which provides that possibility without tying you to Slim framework.
 
 ## Installation
 
@@ -28,77 +32,105 @@ Then require_once the autoload file:
 require_once './vendor/autoload.php';
 ```
 
-## Usage
+## Configuration
 
-### Standalone
+Each kind of manager has its configurations stored on a key in the settings array
+ 
+* `entity_manager` for `ORM`
+* `mongodb_document_manager` for `MongoDB ODM`
+* `couchdb_document_manager` for `CouchDB ODM`
 
 ```php
-use Jgut\Slim\Doctrine\DocumentManagerBuilder;
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
-
-$entityManagerSettings = [
-    'connection' => [
-        'driver' => 'pdo_sqlite',
-        'memory' => true,
+[
+    'entity_manager' => [
+        'manager_name' => <manager_builder_configuration>,
+        'manager_name' => <manager_builder_configuration>,
+        ...
     ],
-    'annotation_paths' => ['path_to_entities_files'],
-];
-$entityManager = EntityManagerBuilder::build($entityManagerSettings);
-
-$documentManagerSettings = [
-    'connection' => [
-        'server' => 'mongodb://localhost:27017',
+    'mongodb_document_manager' => [
+        'manager_name' => <manager_builder_configuration>,
+        'manager_name' => <manager_builder_configuration>,
+        ...
     ],
-    'annotation_paths' => ['path_to_documents_files'],
+    'couchdb_document_manager' => [
+        'manager_name' => <manager_builder_configuration>,
+        'manager_name' => <manager_builder_configuration>,
+        ...
+    ],
 ]
-$documentManager = DocumentManagerBuilder::build($documentManagerSettings);
 ```
 
-### In Slim3
+If no name provided for a manager a default one will be given:
 
-Register in the DI container as any other service.
+* `entityManager` for `entity_manager`
+* `mongoDocumentManager` for `mongodb_document_manager`
+* `couchDocumentManager` for `couchdb_document_manager`
+
+### Manager builders
+
+In order to configure the different Doctrine manager builders head to [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which is used in this package.
+
+## Usage
+
+Register managers in the DI container as any other service.
 
 ```php
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
+use Jgut\Slim\Doctrine\ManagerBuilder;
 use Slim\App;
 
-// Create Slim app and fetch DI Container
-$app = new App();
-$container = $app->getContainer();
-
-// Register Entity Manager in the container
-$container['entityManager'] = function () {
-    $entityManagerSettings = [
+// Loaded from a file
+$settings = [
+    'entity_manager' => [
         'connection' => [
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ],
         'annotation_paths' => ['path_to_entities_files'],
-    ];
+    ],
+];
 
-    return EntityManagerBuilder::build($entityManagerSettings);
-};
+// Create manager builder loading settings array
+$managerBuilder = (new ManagerBuilder())->loadFromArray($settings);
 
+// Create Slim app and fetch DI Container
+$app = new App();
+$container = $app->getContainer();
+
+// Register every manager in the container
+foreach ($managerBuilder->getManagers as $name => $manager) {
+    $container[$name] = $manager;
+}
+
+// Use managers
 $app->get('/', function () {
     $this->entityManager->persist(new \Entity);
     $this->entityManager->flush();
 });
 ```
 
-You can use Slim3 settings service to store Doctrine configurations.
+Register manager builder in the DI container to delegate managers creation.
 
 ```php
-use Jgut\Slim\Doctrine\DocumentManagerBuilder;
+use Jgut\Slim\Doctrine\ManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
 
+// Loaded from a file
 $settings = [
-    'settings' => [
-        'document_manager' => [
-            'connection' => [
-                'server' => 'mongodb://localhost:27017',
+    'doctrine_managers' => [
+        'mongodb_document_manager' => [
+            'mainDocumentManager' => [
+                'connection' => [
+                    'server' => 'mongodb://localhost:27017',
+                ],
+                'annotation_paths' => ['path_to_documents_files'],
             ],
-            'annotation_paths' => ['path_to_documents_files'],
+            'secondaryDocumentManager' => [
+                'connection' => [
+                    'server' => 'mongodb://localhost:27017',
+                ],
+                'annotation_paths' => ['path_to_documents_files'],
+            ],
         ],
     ],
 ];
@@ -107,155 +139,41 @@ $settings = [
 $app = new App($settings);
 $container = $app->getContainer();
 
-// Register Document Manager in the container
-$container['documentManager'] = function (ContainerInterface $container) {
-    return DocumentManagerBuilder::build($container->get('settings')['document_manager']);
+// Register manager builder fetching settings from container
+$container['manager_builder'] => function (ContainerInterface $container) {
+    return (new ManagerBuilder())->loadFromContainer($container, 'doctrine_managers');
 };
 
+// Register managers by pulling them from the builder
+$container['mainDocumentManager'] => function (ContainerInterface $container) {
+    return $container->get('manager_builder')->getManager('mainDocumentManager');
+};
+
+// Use managers
 $app->get('/', function () {
-    $this->documentManager->persist(new \Document);
-    $this->documentManager->flush();
+    $this->mainDocumentManager->persist(new \Document);
+    $this->mainDocumentManager->flush();
 });
 ```
 
-### ORM Entity Manager configurations
-
-* `connection` array of PDO configurations or \Doctrine\DBAL\Connection
-* `cache_driver` \Doctrine\Common\Cache\Cache
-* `cache_namespace` string for cache namespace
-* `annotation_files` array of Doctrine annotations files
-* `annotation_namespaces` array of Doctrine annotations namespaces
-* `annotation_autoloaders` array of Doctrine annotations autoloader callables
-* `annotation_paths` array of paths where to find annotated entity files
-* `xml_paths` array of paths where to find XML entity mapping files
-* `yaml_paths` array of paths where to find YAML entity mapping files
-* `php_paths` array of paths where to find PHP entity mapping files
-* `naming_strategy` a `\Doctrine\ORM\Mapping\NamingStrategy`, defaults to `UnderscoreNamingStrategy`
-* `quote_strategy` a `\Doctrine\ORM\Mapping\QuoteStrategy`, defaults to `DefaultQuoteStrategy`
-* `proxy_path` path were Doctrine creates its proxy classes, defaults to /tmp
-* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineORMProxy'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior
-* `sql_logger` a `\Doctrine\DBAL\Logging\SQLLogger`
-* `event_manager` a configured `Doctrine\Common\EventManager`
-* `custom_types` array of `'type_name' => '\Doctrine\DBAL\Types\Type'`
-* `string_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
-* `numeric_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
-* `datetime_functions` array of custom `'function_name' => '\Doctrine\ORM\Query\AST\Functions\FunctionNode'` DQL functions
-
-### Mongo ODM Document Manager configurations
-
-* `connection` array of MongoClient configurations or \Doctrine\MongoDB\Connection
-* `cache_driver` \Doctrine\Common\Cache\Cache
-* `cache_namespace` string for cache namespace
-* `annotation_files` array of Doctrine annotations files
-* `annotation_namespaces` array of Doctrine annotations namespaces
-* `annotation_autoloaders` array of Doctrine annotations autoloader callables
-* `annotation_paths` array of paths where to find annotated document files
-* `xml_paths` array of paths where to find XML document mapping files
-* `yaml_paths` array of paths where to find YAML document mapping files
-* `php_paths` array of paths where to find PHP document mapping files
-* `default_database` default database to be used in case none specified
-* `proxy_path` path where Doctrine creates its proxy classes, defaults to /tmp
-* `proxies_namespace` string for proxies namespace, defaults to 'DoctrineODMProxy'
-* `auto_generate_proxies` integer indicating proxy auto generation behavior
-* `hydrator_path` path where Doctrine creates its hydrator classes, defaults to /tmp
-* `hydrators_namespace` string for hydrators namespace, defaults to 'DoctrineODMHydrator'
-* `auto_generate_hydrators` integer indicating hydrators auto generation behavior
-* `logger_callable` valid callable
-* `event_manager` a configured `Doctrine\Common\EventManager`
-
-### Considerations
-
-These are general considerations when configuring both Entity and Document managers:
-
-* `connection` configuration is mandatory:
-    * For ORM as a PDO configurations array or as a proper Doctrine DBAL Connection.
-    * For ODM as a MongoClient configurations array or as a proper Doctrine MongoDB Connection.
-
-* One of 'paths' configurations is mandatory (`annotation_paths`, `xml_paths`, `yaml_paths` or `php_paths`) as it's needed by Doctrine to configure the Metadata Driver. They are checked in that order and the first to appear is the one that gets configured. Most commonly used is annotation_paths.
-
-* `auto_generate_proxies` configuration values are `Doctrine\Common\Proxy\AbstractProxyFactory` constants, in both cases it defaults to `Doctrine\Common\Proxy\AbstractProxyFactory::AUTOGENERATE_NEVER` (0).
-
-* Managers are being configured **ready for production**, this mainly means proxies and hydrators won't be automatically generated and, in case no `cache_driver` is provided, one will be auto-generated in the following order depending on availability: `ApcCache`, `XcacheCache`, `MemcacheCache`, `RedisCache` and finally fallback to `ArrayCache` which is always available. It is recommended you always provide your cache provider, for development you should use `VoidCache`.
-
-## Extending managers
-
-Extending managers with custom types or custom mappings is really simple, here you'll find an example using two well known libraries.
-
-### [ramsey/uuid-doctrine](https://github.com/ramsey/uuid-doctrine)
-
-```
-composer require ramsey/uuid-doctrine
-```
-
-```php
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
-use Ramsey\Uuid\Doctrine\UuidType;
-
-$entityManagerSettings = [
-    'connection' => [
-        'driver' => 'pdo_sqlite',
-        'memory' => true,
-    ],
-    'annotation_paths' => ['path_to_entities_files'],
-    'custom_types' => ['uuid' => UuidType::class]
-];
-
-$entityManager = EntityManagerBuilder::build($entityManagerSettings);
-```
-
-### [gedmo/doctrine-extensions](https://github.com/Atlantic18/DoctrineExtensions)
-
-```
-composer require gedmo/doctrine-extensions
-```
-
-```php
-use Doctrine\Common\EventManager;
-use Gedmo\DoctrineExtensions;
-use Gedmo\Sluggable\SluggableListener;
-use Gedmo\Timestampable\TimestampableListener;
-use Jgut\Slim\Doctrine\EntityManagerBuilder;
-
-$eventManager = new EventManager;
-$eventManager->addEventSubscriber(new SluggableListener);
-$eventManager->addEventSubscriber(new TimestampableListener);
-
-$entityManagerSettings = [
-    'connection' => [
-        'driver' => 'pdo_sqlite',
-        'memory' => true,
-    ],
-    'annotation_paths' => ['path_to_entities_files'],
-    'event_manager' => $eventManager
-];
-
-$entityManager = EntityManagerBuilder::build($entityManagerSettings);
-DoctrineExtensions::registerAbstractMappingIntoDriverChainORM(
-    $entityManager->getConfiguration()->getMetadataDriverImpl()
-);
-```
+When using settings in the container with `loadFromContainer` method you must specify under which key they are stored. In the example above `doctrine_managers` is used.
 
 ## CLI Application builder
 
-The easiest way to create `cli-config.php` for Doctrine CLI command runner
+`doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does but it doesn't need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager name.
+
+The way to using `doctrine-manager` is the same as with `doctrine` by creating a `cli-config.php` file
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
 
-use Jgut\Slim\Doctrine\CLIApplicationBuilder;
+use Jgut\Slim\Doctrine\ManagerBuilder;
 
-$CLISettings = [
-    'cache_driver' => new VoidCache,
-];
 $settings = require 'configurations.php';
 
-$application = CLIApplication::build(
-    array_merge($settings['entity_manager'], $CLISettings),
-    array_merge($settings['document_manager'], $CLISettings)
-);
+$managerBuilder = (new ManagerBuilder())->loadFromArray($settings);
 
-return $application->run();
+return $managerBuilder->getCLIApplication();
 ```
 
 ## Contributing
