@@ -1,6 +1,6 @@
 {
   "name": "juliangut/slim-doctrine",
-  "description": "Doctrine managers building",
+  "description": "Slim-Doctrine managers integration",
   "keywords": [
     "slim",
     "framework",

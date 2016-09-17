@@ -17,7 +17,7 @@ use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
 use Symfony\Component\Console\Application;
 
 /**
- * Slim Doctrine managers integration.
+ * Slim-Doctrine managers integration.
  */
 class ManagerBuilder
 {

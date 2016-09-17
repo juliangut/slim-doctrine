@@ -1,4 +1,4 @@
-[![PHP version](https://img.shields.io/badge/PHP-%3E%3D5.5-8892BF.svg?style=flat-square)](http://php.net)
+[![PHP version](https://img.shields.io/badge/PHP-%3E%3D5.6-8892BF.svg?style=flat-square)](http://php.net)
 [![Latest Version](https://img.shields.io/packagist/vpre/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 [![License](https://img.shields.io/github/license/juliangut/slim-doctrine.svg?style=flat-square)](https://github.com/juliangut/slim-doctrine/blob/master/LICENSE)
 
@@ -8,15 +8,15 @@
 [![Code Coverage](https://img.shields.io/coveralls/juliangut/slim-doctrine.svg?style=flat-square)](https://coveralls.io/github/juliangut/slim-doctrine)
 [![Total Downloads](https://img.shields.io/packagist/dt/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 
-# Slim Doctrine managers integration
+# Slim-Doctrine managers integration
 
 Frees you from the tedious work of configuring and integrating Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
 
 ## Important note
 
-This latest version of slim-doctrine is focused on Slim framework and Doctrine integration and thus using the manager builders as stand alone is not possible.
+The latest version of slim-doctrine is focused only on Slim framework and Doctrine integration, and thus using the manager builders as stand alone is not possible.
 
-For that head to [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which provides that possibility without tying you to Slim framework.
+That same functionality can be achieved by using [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which is not tied to Slim framework.
 
 ## Installation
 
