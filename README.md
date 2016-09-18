@@ -10,7 +10,7 @@
 
 # Slim-Doctrine managers integration
 
-Frees you from the tedious work of configuring and integrating Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
+Easy Slim framework integration with Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
 
 ## Important note
 
@@ -75,6 +75,7 @@ In order to configure the different Doctrine manager builders head to [juliangut
 Register managers in the DI container as any other service.
 
 ```php
+use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 use Slim\App;
 
@@ -85,12 +86,17 @@ $settings = [
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ],
-        'annotation_paths' => ['path_to_entities_files'],
+        'metadata_mapping' => [
+            [
+                'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                'path' => 'path/to/annotation/mappings',
+            ],
+        ],
     ],
 ];
 
 // Create manager builder loading settings array
-$managerBuilder = (new ManagerBuilder())->loadFromArray($settings);
+$managerBuilder = (new ManagerBuilder())->loadSettings($settings);
 
 // Create Slim app and fetch DI Container
 $app = new App();
@@ -111,6 +117,7 @@ $app->get('/', function () {
 Register manager builder in the DI container to delegate managers creation.
 
 ```php
+use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
@@ -123,13 +130,23 @@ $settings = [
                 'connection' => [
                     'server' => 'mongodb://localhost:27017',
                 ],
-                'annotation_paths' => ['path_to_documents_files'],
+                'metadata_mapping' => [
+                    [
+                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'path' => 'path/to/annotation/mappings',
+                    ],
+                ],
             ],
             'secondaryDocumentManager' => [
                 'connection' => [
                     'server' => 'mongodb://localhost:27017',
                 ],
-                'annotation_paths' => ['path_to_documents_files'],
+                'metadata_mapping' => [
+                    [
+                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'path' => 'path/to/annotation/mappings',
+                    ],
+                ],
             ],
         ],
     ],
@@ -141,12 +158,15 @@ $container = $app->getContainer();
 
 // Register manager builder fetching settings from container
 $container['manager_builder'] => function (ContainerInterface $container) {
-    return (new ManagerBuilder())->loadFromContainer($container, 'doctrine_managers');
+    return (new ManagerBuilder())->loadSettings($container->get('doctrine_managers'));
 };
 
 // Register managers by pulling them from the builder
 $container['mainDocumentManager'] => function (ContainerInterface $container) {
     return $container->get('manager_builder')->getManager('mainDocumentManager');
+};
+$container['secondaryDocumentManager'] => function (ContainerInterface $container) {
+    return $container->get('manager_builder')->getManager('secondaryDocumentManager');
 };
 
 // Use managers
@@ -156,13 +176,11 @@ $app->get('/', function () {
 });
 ```
 
-When using settings in the container with `loadFromContainer` method you must specify under which key they are stored. In the example above `doctrine_managers` is used.
-
 ## CLI Application builder
 
 `doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does but it doesn't need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager name.
 
-The way to using `doctrine-manager` is the same as with `doctrine` by creating a `cli-config.php` file
+The way to using `doctrine-manager` is the same as with `doctrine` by creating a `cli-config.php` file returning a Symfony\Component\Console\Application
 
 ```php
 require __DIR__ . '/vendor/autoload.php';
@@ -171,7 +189,7 @@ use Jgut\Slim\Doctrine\ManagerBuilder;
 
 $settings = require 'configurations.php';
 
-$managerBuilder = (new ManagerBuilder())->loadFromArray($settings);
+$managerBuilder = (new ManagerBuilder())->loadSettings($settings);
 
 return $managerBuilder->getCLIApplication();
 ```

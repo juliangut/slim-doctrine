@@ -27,24 +27,7 @@ class ManagerBuilder
     protected $builders = [];
 
     /**
-     * Load Doctrine managers from container configuration.
-     *
-     * @param ContainerInterface $container
-     * @param string             $key
-     *
-     * @throws \Interop\Container\Exception\ContainerException
-     * @throws \Interop\Container\Exception\NotFoundException
-     * @throws \RuntimeException
-     *
-     * @return $this
-     */
-    public function loadFromContainer(ContainerInterface $container, $key)
-    {
-        return $this->loadFromArray((array) $container->get((string) $key));
-    }
-
-    /**
-     * Load Doctrine managers from configuration array.
+     * Load Doctrine managers from settings array.
      *
      * @param array $settings
      *
@@ -52,7 +35,7 @@ class ManagerBuilder
      *
      * @return $this
      */
-    public function loadFromArray(array $settings)
+    public function loadSettings(array $settings)
     {
         if (array_key_exists('entity_manager', $settings)) {
             $this->registerEntityManagers((array) $settings['entity_manager']);
@@ -79,7 +62,7 @@ class ManagerBuilder
     protected function registerEntityManagers(array $settings)
     {
         if (array_key_exists('connection', $settings)) {
-            $settings = (array) $settings;
+            $settings = [$settings];
         }
 
         foreach ($settings as $name => $config) {
@@ -101,7 +84,7 @@ class ManagerBuilder
     protected function registerMongoDBDocumentManagers(array $settings)
     {
         if (array_key_exists('connection', $settings)) {
-            $settings = (array) $settings;
+            $settings = [$settings];
         }
 
         foreach ($settings as $name => $config) {
@@ -123,7 +106,7 @@ class ManagerBuilder
     protected function registerCouchDBDocumentManagers(array $settings)
     {
         if (array_key_exists('connection', $settings)) {
-            $settings = (array) $settings;
+            $settings = [$settings];
         }
 
         foreach ($settings as $name => $config) {
@@ -136,7 +119,7 @@ class ManagerBuilder
     }
 
     /**
-     * Add builder.
+     * Add manager builder.
      *
      * @param Builder $builder
      *
@@ -144,9 +127,13 @@ class ManagerBuilder
      *
      * @return $this
      */
-    protected function addBuilder(Builder $builder)
+    public function addBuilder(Builder $builder)
     {
-        $builderName = $builder->getName();
+        $builderName = (string) $builder->getName();
+
+        if ($builderName === '') {
+            throw new \RuntimeException('Only named manager builders allowed');
+        }
 
         if (array_key_exists($builderName, $this->builders)) {
             throw new \RuntimeException(sprintf('"%s" manager builder is already registered', $builderName));
@@ -158,7 +145,7 @@ class ManagerBuilder
     }
 
     /**
-     * Get registered builders.
+     * Get registered builder's managers.
      *
      * @return \Doctrine\Common\Persistence\ObjectManager[]
      */
