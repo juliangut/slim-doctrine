@@ -109,7 +109,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                         [
                             'type' => Builder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
-                        ]
+                        ],
                     ],
                 ],
             ],
@@ -187,7 +187,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                         [
                             'type' => Builder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
-                        ]
+                        ],
                     ],
                 ],
             ],

@@ -9,7 +9,6 @@
 
 namespace Jgut\Slim\Doctrine;
 
-use Interop\Container\ContainerInterface;
 use Jgut\Doctrine\ManagerBuilder\CouchDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
