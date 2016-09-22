@@ -77,7 +77,6 @@ In order to configure the different Doctrine manager builders head to [juliangut
 Register managers in the DI container as any other service.
 
 ```php
-use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 use Slim\App;
 
@@ -90,7 +89,7 @@ $settings = [
         ],
         'metadata_mapping' => [
             [
-                'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                 'path' => 'path/to/annotation/mappings',
             ],
         ],
@@ -119,7 +118,6 @@ $app->get('/', function () {
 Register manager builder in the DI container to delegate managers creation.
 
 ```php
-use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
@@ -134,7 +132,7 @@ $settings = [
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => 'path/to/annotation/mappings',
                     ],
                 ],
@@ -145,7 +143,7 @@ $settings = [
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => 'path/to/annotation/mappings',
                     ],
                 ],

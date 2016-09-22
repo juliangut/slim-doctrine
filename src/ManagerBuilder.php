@@ -20,6 +20,11 @@ use Symfony\Component\Console\Application;
  */
 class ManagerBuilder
 {
+    const METADATA_MAPPING_ANNOTATION = Builder::METADATA_MAPPING_ANNOTATION;
+    const METADATA_MAPPING_XML = Builder::METADATA_MAPPING_XML;
+    const METADATA_MAPPING_YAML = Builder::METADATA_MAPPING_YAML;
+    const METADATA_MAPPING_PHP = Builder::METADATA_MAPPING_PHP;
+
     /**
      * @var Builder[]
      */

@@ -12,7 +12,6 @@ namespace Jgut\Slim\Doctrine\Tests;
 use Doctrine\ODM\CouchDB\DocumentManager as CouchDBDocumentManager;
 use Doctrine\ODM\MongoDB\DocumentManager as MongoDBDocumentManager;
 use Doctrine\ORM\EntityManager;
-use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 
@@ -31,7 +30,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => __DIR__,
                     ],
                 ],
@@ -43,7 +42,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => __DIR__,
                     ],
                 ],
@@ -55,7 +54,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => __DIR__,
                     ],
                 ],
@@ -93,7 +92,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                     'metadata_mapping' => [
                         [
-                            'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
                         ],
                     ],
@@ -107,7 +106,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                     'metadata_mapping' => [
                         [
-                            'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
                         ],
                     ],
@@ -134,7 +133,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                 ],
                 'metadata_mapping' => [
                     [
-                        'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                         'path' => __DIR__,
                     ],
                 ],
@@ -171,7 +170,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                     'metadata_mapping' => [
                         [
-                            'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
                         ],
                     ],
@@ -185,7 +184,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                     'metadata_mapping' => [
                         [
-                            'type' => Builder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
                             'path' => __DIR__,
                         ],
                     ],
