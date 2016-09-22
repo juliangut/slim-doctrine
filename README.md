@@ -83,6 +83,7 @@ use Slim\App;
 // Loaded from a file
 $settings = [
     'entity_manager' => [
+        'annotation_autoloaders' => ['class_exists'],
         'connection' => [
             'driver' => 'pdo_sqlite',
             'memory' => true,
@@ -138,6 +139,7 @@ $settings = [
                 ],
             ],
             'secondaryDocumentManager' => [
+                'annotation_autoloaders' => ['class_exists'],
                 'connection' => [
                     'server' => 'mongodb://localhost:27017',
                 ],

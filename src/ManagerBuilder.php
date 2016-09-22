@@ -9,6 +9,7 @@
 
 namespace Jgut\Slim\Doctrine;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Jgut\Doctrine\ManagerBuilder\CouchDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
@@ -155,12 +156,16 @@ class ManagerBuilder
      */
     public function getManagers()
     {
-        return array_map(
+        $managers = array_map(
             function (Builder $builder) {
                 return $builder->getManager();
             },
             $this->builders
         );
+
+        AnnotationRegistry::registerLoader('class_exists');
+
+        return $managers;
     }
 
     /**
@@ -198,6 +203,8 @@ class ManagerBuilder
                 $application->add($command)->setHelperSet($helperSet);
             }
         }
+
+        AnnotationRegistry::registerLoader('class_exists');
 
         return $application;
     }
