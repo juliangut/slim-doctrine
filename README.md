@@ -104,7 +104,7 @@ $app = new App();
 $container = $app->getContainer();
 
 // Register every manager in the container
-foreach ($managerBuilder->getManagers as $name => $manager) {
+foreach ($managerBuilder->getManagers() as $name => $manager) {
     $container[$name] = $manager;
 }
 
