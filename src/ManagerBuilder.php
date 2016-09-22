@@ -143,7 +143,7 @@ class ManagerBuilder
             throw new \RuntimeException(sprintf('"%s" manager builder is already registered', $builderName));
         }
 
-        $this->builders[$builder->getName()] = $builder;
+        $this->builders[$builderName] = $builder;
 
         return $this;
     }
