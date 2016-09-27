@@ -10,7 +10,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 [![Monthly Downloads](https://img.shields.io/packagist/dm/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 
-# Slim-Doctrine managers integration
+# Slim integration with Doctrine managers
 
 Easy Slim framework integration with Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
 

@@ -10,6 +10,7 @@
 namespace Jgut\Slim\Doctrine;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Jgut\Doctrine\ManagerBuilder\AbstractBuilderCollection;
 use Jgut\Doctrine\ManagerBuilder\CouchDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Application;
 /**
  * Slim-Doctrine managers integration.
  */
-class ManagerBuilder
+class ManagerBuilder extends AbstractBuilderCollection
 {
     const METADATA_MAPPING_ANNOTATION = Builder::METADATA_MAPPING_ANNOTATION;
     const METADATA_MAPPING_XML = Builder::METADATA_MAPPING_XML;
@@ -27,9 +28,11 @@ class ManagerBuilder
     const METADATA_MAPPING_PHP = Builder::METADATA_MAPPING_PHP;
 
     /**
-     * @var Builder[]
+     * Global annotation loader control.
+     *
+     * @var bool
      */
-    protected $builders = [];
+    protected $globalLoaderRegister = true;
 
     /**
      * Load Doctrine managers from settings array.
@@ -124,32 +127,6 @@ class ManagerBuilder
     }
 
     /**
-     * Add manager builder.
-     *
-     * @param Builder $builder
-     *
-     * @throws \RuntimeException
-     *
-     * @return $this
-     */
-    public function addBuilder(Builder $builder)
-    {
-        $builderName = (string) $builder->getName();
-
-        if ($builderName === '') {
-            throw new \RuntimeException('Only named manager builders allowed');
-        }
-
-        if (array_key_exists($builderName, $this->builders)) {
-            throw new \RuntimeException(sprintf('"%s" manager builder is already registered', $builderName));
-        }
-
-        $this->builders[$builderName] = $builder;
-
-        return $this;
-    }
-
-    /**
      * Get registered builder's managers.
      *
      * @return \Doctrine\Common\Persistence\ObjectManager[]
@@ -163,7 +140,7 @@ class ManagerBuilder
             $this->builders
         );
 
-        AnnotationRegistry::registerLoader('class_exists');
+        $this->registerGlobalAnnotationLoader();
 
         return $managers;
     }
@@ -179,11 +156,16 @@ class ManagerBuilder
      */
     public function getManager($name)
     {
-        if (!array_key_exists($name, $this->builders)) {
+        $builder = $this->getBuilder($name);
+        if (!$builder instanceof Builder) {
             throw new \RuntimeException(sprintf('"%s" is not a registered manager', $name));
         }
 
-        return $this->builders[$name]->getManager();
+        $manager = $builder->getManager();
+
+        $this->registerGlobalAnnotationLoader();
+
+        return $manager;
     }
 
     /**
@@ -204,8 +186,21 @@ class ManagerBuilder
             }
         }
 
-        AnnotationRegistry::registerLoader('class_exists');
+        $this->registerGlobalAnnotationLoader();
 
         return $application;
+    }
+
+    /**
+     * Register global annotation loader.
+     * class_exists function.
+     */
+    protected function registerGlobalAnnotationLoader()
+    {
+        if ($this->globalLoaderRegister) {
+            AnnotationRegistry::registerLoader('class_exists');
+
+            $this->globalLoaderRegister = false;
+        }
     }
 }
