@@ -13,8 +13,11 @@ Find here a few rules to follow in order to keep the code clean and easy to revi
 - Just **one pull request per feature** at a time
 - Check that **[Travis CI](https://travis-ci.org/juliangut/slim-doctrine)** build passed
 
-[Grunt](http://gruntjs.com/) tasks are provided to help you keep code quality and run the test suite
+[Gulp](http://gulpjs.com/) tasks are provided to help you keep code quality and run the test suite:
 
-- `grunt check` will run PHP linting, [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer) for style guidelines, [PHPMD](https://github.com/phpmd/phpmd) for code smells and [PHPCPD](https://github.com/sebastianbergmann/phpcpd) for copy/paste detection
-- `grunt test` will run [PHPUnit](https://github.com/sebastianbergmann/phpunit) for unit tests
-- `grunt` will run previous commands at once
+- `gulp qa` will run PHP linting, [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer) for coding style guidelines, [PHPMD](https://github.com/phpmd/phpmd) for code smells and [PHPCPD](https://github.com/sebastianbergmann/phpcpd) for copy/paste detection
+- `gulp test` will run [PHPUnit](https://github.com/sebastianbergmann/phpunit) for unit tests
+- `gulp fix` will run [PHP-CS-Fixer](https://github.com/FriendsOfPhp/PHP-CS-Fixer) for fixing coding style
+- `gulp security` will run [Composer](https://getcomposer.org) (>=1.1.0) for outdated dependencies
+- `gulp build` building process
+- `gulp` will run `qa` and `test` tasks at once

@@ -16,8 +16,7 @@
     "email": "juliangut@gmail.com",
     "url": "http://juliangut.com"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-composer": "^0.4.0",

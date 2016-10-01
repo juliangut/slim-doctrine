@@ -4,4 +4,5 @@ composer.phar
 vendor/
 node_modules/
 .yo-rc.json
-dist/
+.php_cs.cache
+build/
