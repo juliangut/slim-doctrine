@@ -13,7 +13,7 @@ namespace Jgut\Slim\Doctrine\Tests;
 use Doctrine\ODM\CouchDB\DocumentManager as CouchDBDocumentManager;
 use Doctrine\ODM\MongoDB\DocumentManager as MongoDBDocumentManager;
 use Doctrine\ORM\EntityManager;
-use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
+use Jgut\Doctrine\ManagerBuilder\AbstractManagerBuilder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
 
 /**
@@ -152,10 +152,10 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testUnnamedBuilder()
     {
-        $builder = $this->getMockBuilder(RelationalBuilder::class)
+        $builder = $this->getMockBuilder(AbstractManagerBuilder::class)
             ->disableOriginalConstructor()
-            ->getMock();
-        /* @var \Jgut\Doctrine\ManagerBuilder\AbstractManagerBuilder $builder */
+            ->getMockForAbstractClass();
+        /* @var AbstractManagerBuilder $builder */
 
         (new ManagerBuilder())->addBuilder($builder);
     }
