@@ -1,10 +1,11 @@
 <?php
-/**
- * Slim3 Doctrine integration (https://github.com/juliangut/slim-doctrine)
+
+/*
+ * Slim3 Doctrine integration (https://github.com/juliangut/slim-doctrine).
  *
- * @link https://github.com/juliangut/slim-doctrine for the canonical source repository
- *
- * @license https://raw.githubusercontent.com/juliangut/slim-doctrine/master/LICENSE
+ * @license BSD-3-Clause
+ * @link https://github.com/juliangut/slim-doctrine
+ * @author Julián Gutiérrez <juliangut@gmail.com>
  */
 
 namespace Jgut\Slim\Doctrine\Tests;
