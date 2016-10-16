@@ -46,7 +46,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Jgut\\Slim\\Doctrine\\": "src"
+      "Jgut\\Slim\\Doctrine\\": "src/"
     }
   },
   "autoload-dev": {
