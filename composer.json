@@ -57,5 +57,19 @@
   ],
   "config": {
     "preferred-install": "dist"
+  },
+  "scripts": {
+    "phplint": "php -l src & php -l tests",
+    "phpcs": "phpcs --standard=PSR2 src tests",
+    "phpcs-lint": "php-cs-fixer fix --dry-run --verbose",
+    "phpcpd": "phpcpd src",
+    "phpmd": "phpmd src text phpmd.xml",
+    "phpunit": "phpunit",
+    "phpunit-coverage": "phpunit --coverage-html build/coverage",
+    "phpunit-clover": "phpunit --coverage-clover build/logs/clover.xml",
+    "qa": "composer phplint & composer phpcs & composer phpcs-lint & composer phpcpd & composer phpmd",
+    "fix": "php-cs-fixer fix --verbose",
+    "security": "composer outdated",
+    "test": "composer qa & composer phpunit"
   }
 }

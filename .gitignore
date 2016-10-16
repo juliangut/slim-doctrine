@@ -2,7 +2,6 @@
 composer.lock
 composer.phar
 vendor/
-node_modules/
 .yo-rc.json
-.php_cs.cache
+*.cache
 build/
