@@ -16,6 +16,7 @@ use Jgut\Doctrine\ManagerBuilder\CouchDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
+use Jgut\Doctrine\ManagerBuilder\Util\OptionsTrait;
 use Symfony\Component\Console\Application;
 
 /**
@@ -23,10 +24,20 @@ use Symfony\Component\Console\Application;
  */
 class ManagerBuilder extends AbstractBuilderCollection
 {
+    use OptionsTrait;
+
     const METADATA_MAPPING_ANNOTATION = Builder::METADATA_MAPPING_ANNOTATION;
     const METADATA_MAPPING_XML = Builder::METADATA_MAPPING_XML;
     const METADATA_MAPPING_YAML = Builder::METADATA_MAPPING_YAML;
     const METADATA_MAPPING_PHP = Builder::METADATA_MAPPING_PHP;
+
+    const RELATIONAL_MANAGER_KEY = 'relational_manager_key';
+    const MONGODB_MANAGER_KEY = 'mongodb_manager_key';
+    const COUCHDB_MANAGER_KEY = 'couchdb_manager_key';
+
+    const RELATIONAL_MANAGER_NAME = 'relational_manager_name';
+    const MONGODB_MANAGER_NAME = 'mongodb_manager_name';
+    const COUCHDB_MANAGER_NAME = 'couchdb_manager_name';
 
     /**
      * Global annotation loader control.
@@ -34,6 +45,28 @@ class ManagerBuilder extends AbstractBuilderCollection
      * @var bool
      */
     protected $globalLoaderRegister = true;
+
+    /**
+     * ManagerBuilder constructor.
+     *
+     * @param array $options
+     */
+    public function __construct(array $options = [])
+    {
+        $options = array_merge(
+            [
+                static::RELATIONAL_MANAGER_KEY => 'entity_manager',
+                static::MONGODB_MANAGER_KEY => 'mongodb_document_manager',
+                static::COUCHDB_MANAGER_KEY => 'couchdb_document_manager',
+                static::RELATIONAL_MANAGER_NAME => 'entityManager',
+                static::MONGODB_MANAGER_NAME => 'mongoDocumentManager',
+                static::COUCHDB_MANAGER_NAME => 'couchDocumentManager',
+            ],
+            $options
+        );
+
+        $this->setOptions($options);
+    }
 
     /**
      * Load Doctrine managers from settings array.
@@ -46,16 +79,19 @@ class ManagerBuilder extends AbstractBuilderCollection
      */
     public function loadSettings(array $settings)
     {
-        if (array_key_exists('entity_manager', $settings)) {
-            $this->registerEntityManagers((array) $settings['entity_manager']);
+        $relationalManagerKey = $this->getOption(static::RELATIONAL_MANAGER_KEY);
+        if (array_key_exists($relationalManagerKey, $settings)) {
+            $this->registerEntityManagers((array) $settings[$relationalManagerKey]);
         }
 
-        if (array_key_exists('mongodb_document_manager', $settings)) {
-            $this->registerMongoDBDocumentManagers((array) $settings['mongodb_document_manager']);
+        $mongoDBManagerKey = $this->getOption(static::MONGODB_MANAGER_KEY);
+        if (array_key_exists($mongoDBManagerKey, $settings)) {
+            $this->registerMongoDBDocumentManagers((array) $settings[$mongoDBManagerKey]);
         }
 
-        if (array_key_exists('couchdb_document_manager', $settings)) {
-            $this->registerCouchDBDocumentManagers((array) $settings['couchdb_document_manager']);
+        $couchDBManagerKey = $this->getOption(static::COUCHDB_MANAGER_KEY);
+        if (array_key_exists($couchDBManagerKey, $settings)) {
+            $this->registerCouchDBDocumentManagers((array) $settings[$couchDBManagerKey]);
         }
 
         return $this;
@@ -76,7 +112,7 @@ class ManagerBuilder extends AbstractBuilderCollection
 
         foreach ($settings as $name => $config) {
             if (!is_string($name)) {
-                $name = 'entityManager';
+                $name = $this->getOption(static::RELATIONAL_MANAGER_NAME);
             }
 
             $this->addBuilder(new RelationalBuilder($config, $name));
@@ -98,7 +134,7 @@ class ManagerBuilder extends AbstractBuilderCollection
 
         foreach ($settings as $name => $config) {
             if (!is_string($name)) {
-                $name = 'mongoDocumentManager';
+                $name = $this->getOption(static::MONGODB_MANAGER_NAME);
             }
 
             $this->addBuilder(new MongoDBBuilder($config, $name));
@@ -120,7 +156,7 @@ class ManagerBuilder extends AbstractBuilderCollection
 
         foreach ($settings as $name => $config) {
             if (!is_string($name)) {
-                $name = 'couchDocumentManager';
+                $name = $this->getOption(static::COUCHDB_MANAGER_NAME);
             }
 
             $this->addBuilder(new CouchDBBuilder($config, $name));

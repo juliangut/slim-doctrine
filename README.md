@@ -62,11 +62,27 @@ Each kind of manager has its configurations stored on a key in the settings arra
 ]
 ```
 
-If no name provided for a manager a default one will be given:
+If a manager is not given a name then a default one will be used:
 
-* `entityManager` for `entity_manager`
-* `mongoDocumentManager` for `mongodb_document_manager`
-* `couchDocumentManager` for `couchdb_document_manager`
+* `entityManager` for `ORM`
+* `mongoDocumentManager` for `MongoDB ODM`
+* `couchDocumentManager` for `CouchDB ODM`
+
+### Options
+
+ManagerBuilder's default keys and manager names can be modified providing constructor with an options array to change any of them
+
+```php
+$options = [
+    ManagerBuilder::RELATIONAL_MANAGER_KEY => 'entity_manager',
+    ManagerBuilder::MONGODB_MANAGER_KEY => 'mongodb_document_manager',
+    ManagerBuilder::COUCHDB_MANAGER_KEY => 'couchdb_document_manager',
+    ManagerBuilder::RELATIONAL_MANAGER_NAME => 'entityManager',
+    ManagerBuilder::MONGODB_MANAGER_NAME => 'mongoDocumentManager',
+    ManagerBuilder::COUCHDB_MANAGER_NAME => 'couchDocumentManager',
+];
+$managerBuilder = new ManagerBuilder($options);
+```
 
 ### Manager builders
 
@@ -82,7 +98,7 @@ use Slim\App;
 
 // Loaded from a file
 $settings = [
-    'entity_manager' => [
+    'my_custom_key' => [
         'annotation_autoloaders' => ['class_exists'],
         'connection' => [
             'driver' => 'pdo_sqlite',
@@ -97,8 +113,8 @@ $settings = [
     ],
 ];
 
-// Create manager builder loading settings array
-$managerBuilder = (new ManagerBuilder())->loadSettings($settings);
+$managerBuilder = new ManagerBuilder([ManagerBuilder::RELATIONAL_MANAGER_KEY => 'my_custom_key']);
+$managerBuilder->loadSettings($settings);
 
 // Create Slim app and fetch DI Container
 $app = new App();
@@ -123,9 +139,9 @@ use Jgut\Slim\Doctrine\ManagerBuilder;
 use Interop\Container\ContainerInterface;
 use Slim\App;
 
-// Loaded from a file
+// Probably loaded from a file...
 $settings = [
-    'doctrine_managers' => [
+    'settings.doctrineManagers' => [
         'mongodb_document_manager' => [
             'mainDocumentManager' => [
                 'connection' => [
@@ -160,7 +176,7 @@ $container = $app->getContainer();
 
 // Register manager builder fetching settings from container
 $container['manager_builder'] => function (ContainerInterface $container) {
-    return (new ManagerBuilder())->loadSettings($container->get('doctrine_managers'));
+    return (new ManagerBuilder())->loadSettings($container->get('settings.doctrineManagers'));
 };
 
 // Register managers by pulling them from the builder
