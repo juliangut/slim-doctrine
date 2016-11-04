@@ -33,7 +33,7 @@ tools:
   php_mess_detector:
     enabled: true
     config:
-      ruleset: phpmd.xml
+      ruleset: unusedcode,naming,design,controversial,codesize
   php_cpd: true
   php_loc: true
   php_pdepend: true
