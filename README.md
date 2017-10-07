@@ -38,25 +38,25 @@ require_once './vendor/autoload.php';
 
 Each kind of manager has its configurations stored on a key in the settings array
  
-* `entity_manager` for `ORM`
-* `mongodb_document_manager` for `MongoDB ODM`
-* `couchdb_document_manager` for `CouchDB ODM`
+* `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY` ("entity_manager") for `ORM`
+* `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY` ("mongodb_document_manager") for `MongoDB ODM`
+* `ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY` ("couchdb_document_manager") for `CouchDB ODM`
 
 ```php
 [
-    'entity_manager' => [
-        'manager_name' => <manager_builder_configuration>,
-        'manager_name' => <manager_builder_configuration>,
+    ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
+        'manager1_name' => <relational_manager_builder_configuration>,
+        'manager2_name' => <relational_manager_builder_configuration>,
         ...
     ],
-    'mongodb_document_manager' => [
-        'manager_name' => <manager_builder_configuration>,
-        'manager_name' => <manager_builder_configuration>,
+    ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
+        'manager3_name' => <mongodb_manager_builder_configuration>,
+        'manager4_name' => <mongodb_manager_builder_configuration>,
         ...
     ],
-    'couchdb_document_manager' => [
-        'manager_name' => <manager_builder_configuration>,
-        'manager_name' => <manager_builder_configuration>,
+    ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY => [
+        'manager5_name' => <couchdb_manager_builder_configuration>,
+        'manager6_name' => <couchdb_manager_builder_configuration>,
         ...
     ],
 ]
@@ -64,9 +64,9 @@ Each kind of manager has its configurations stored on a key in the settings arra
 
 If a manager is not given a name then a default one will be used:
 
-* `entityManager` for `ORM`
-* `mongoDocumentManager` for `MongoDB ODM`
-* `couchDocumentManager` for `CouchDB ODM`
+* `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_NAME` ("entityManager) for `ORM`
+* `ManagerBuilder::DEFAULT_MONGODB_MANAGER_NAME` ("mongoDocumentManager") for `MongoDB ODM`
+* `ManagerBuilder::DEFAULT_COUCHDB_MANAGER_NAME` ("couchDocumentManager") for `CouchDB ODM`
 
 ### Options
 
@@ -142,7 +142,7 @@ use Slim\App;
 // Probably loaded from a file...
 $settings = [
     'settings.doctrineManagers' => [
-        'mongodb_document_manager' => [
+        ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
             'mainDocumentManager' => [
                 'connection' => [
                     'server' => 'mongodb://localhost:27017',
@@ -196,7 +196,7 @@ $app->get('/', function () {
 
 ## CLI Application builder
 
-`doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does but it doesn't need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager name.
+`doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does but it does not need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager name.
 
 The way to using `doctrine-manager` is the same as with `doctrine` by creating a `cli-config.php` file returning a Symfony\Component\Console\Application
 

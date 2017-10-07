@@ -35,9 +35,17 @@ class ManagerBuilder extends AbstractBuilderCollection
     const MONGODB_MANAGER_KEY = 'mongodb_manager_key';
     const COUCHDB_MANAGER_KEY = 'couchdb_manager_key';
 
+    const DEFAULT_RELATIONAL_MANAGER_KEY = 'entity_manager';
+    const DEFAULT_MONGODB_MANAGER_KEY = 'mongodb_document_manager';
+    const DEFAULT_COUCHDB_MANAGER_KEY = 'couchdb_document_manager';
+
     const RELATIONAL_MANAGER_NAME = 'relational_manager_name';
     const MONGODB_MANAGER_NAME = 'mongodb_manager_name';
     const COUCHDB_MANAGER_NAME = 'couchdb_manager_name';
+
+    const DEFAULT_RELATIONAL_MANAGER_NAME = 'entityManager';
+    const DEFAULT_MONGODB_MANAGER_NAME = 'mongoDocumentManager';
+    const DEFAULT_COUCHDB_MANAGER_NAME = 'couchDocumentManager';
 
     /**
      * Global annotation loader control.
@@ -55,12 +63,12 @@ class ManagerBuilder extends AbstractBuilderCollection
     {
         $options = array_merge(
             [
-                static::RELATIONAL_MANAGER_KEY => 'entity_manager',
-                static::MONGODB_MANAGER_KEY => 'mongodb_document_manager',
-                static::COUCHDB_MANAGER_KEY => 'couchdb_document_manager',
-                static::RELATIONAL_MANAGER_NAME => 'entityManager',
-                static::MONGODB_MANAGER_NAME => 'mongoDocumentManager',
-                static::COUCHDB_MANAGER_NAME => 'couchDocumentManager',
+                static::RELATIONAL_MANAGER_KEY => static::DEFAULT_RELATIONAL_MANAGER_KEY,
+                static::MONGODB_MANAGER_KEY => static::DEFAULT_MONGODB_MANAGER_KEY,
+                static::COUCHDB_MANAGER_KEY => static::DEFAULT_COUCHDB_MANAGER_KEY,
+                static::RELATIONAL_MANAGER_NAME => static::DEFAULT_RELATIONAL_MANAGER_NAME,
+                static::MONGODB_MANAGER_NAME => static::DEFAULT_MONGODB_MANAGER_NAME,
+                static::COUCHDB_MANAGER_NAME => static::DEFAULT_COUCHDB_MANAGER_NAME,
             ],
             $options
         );
