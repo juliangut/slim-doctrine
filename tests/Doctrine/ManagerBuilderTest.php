@@ -24,7 +24,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testSingleManagers()
     {
         $settings = [
-            'entity_manager' => [
+            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
                 'connection' => [
                     'driver' => 'pdo_sqlite',
                     'memory' => true,
@@ -36,7 +36,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                 ],
             ],
-            'mongodb_document_manager' => [
+            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
                 'connection' => [
                     'server' => 'mongodb://localhost:27017',
                     'options' => ['connect' => false],
@@ -48,7 +48,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                 ],
             ],
-            'couchdb_document_manager' => [
+            ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY => [
                 'connection' => [
                     'host' => 'localhost',
                     'dbname' => 'doctrine',
@@ -85,7 +85,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testDuplicatedNamedManager()
     {
         $settings = [
-            'entity_manager' => [
+            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
                 'managerOne' => [
                     'connection' => [
                         'driver' => 'pdo_sqlite',
@@ -99,7 +99,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                 ],
             ],
-            'mongodb_document_manager' => [
+            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
                 'managerOne' => [
                     'connection' => [
                         'server' => 'mongodb://localhost:27017',
@@ -127,7 +127,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
         self::assertCount(0, (new ManagerBuilder())->getManagers());
 
         $settings = [
-            'entity_manager' => [
+            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
                 'connection' => [
                     'driver' => 'pdo_sqlite',
                     'memory' => true,
@@ -163,7 +163,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCLIApplication()
     {
         $settings = [
-            'entity_manager' => [
+            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
                 'managerOne' => [
                     'connection' => [
                         'driver' => 'pdo_sqlite',
@@ -177,7 +177,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
                     ],
                 ],
             ],
-            'mongodb_document_manager' => [
+            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
                 'managerTwo' => [
                     'connection' => [
                         'server' => 'mongodb://localhost:27017',
@@ -197,7 +197,7 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
 
         $application = $managerBuilder->getCLIApplication();
 
-        self::assertTrue($application->has('managerOne:dbal:run-sql'));
-        self::assertTrue($application->has('managerTwo:odm:query'));
+        self::assertTrue($application->has('dbal:managerOne:run-sql'));
+        self::assertTrue($application->has('odm:managerTwo:query'));
     }
 }

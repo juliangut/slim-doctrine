@@ -224,9 +224,9 @@ class ManagerBuilder extends AbstractBuilderCollection
         $application->setCatchExceptions(true);
 
         foreach ($this->builders as $builder) {
-            $helperSet = $builder->getConsoleHelperSet();
-
             foreach ($builder->getConsoleCommands() as $command) {
+                $helperSet = $command->getHelperSet();
+
                 $application->add($command)->setHelperSet($helperSet);
             }
         }
