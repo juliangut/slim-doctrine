@@ -39,7 +39,7 @@ require_once './vendor/autoload.php';
 Each kind of manager has its configurations stored on a key in the settings array
  
 * `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY` ("entity_manager") for `ORM`
-* `ManagerBuilder::MONGODB_MANAGER_KEY` ("mongodb_document_manager") for `MongoDB ODM`
+* `ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY` ("mongodb_document_manager") for `MongoDB ODM`
 * `ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY` ("couchdb_document_manager") for `CouchDB ODM`
 
 ```php
@@ -49,7 +49,7 @@ Each kind of manager has its configurations stored on a key in the settings arra
         'manager2_name' => <relational_manager_builder_configuration>,
         ...
     ],
-    ManagerBuilder::MONGODB_MANAGER_KEY => [
+    ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
         'manager3_name' => <mongodb_manager_builder_configuration>,
         'manager4_name' => <mongodb_manager_builder_configuration>,
         ...
