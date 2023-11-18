@@ -24,26 +24,28 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": "^5.6|^7.0",
-    "slim/slim": "^3.0",
-    "juliangut/doctrine-manager-builder": "^1.7"
+    "php": "^8.0",
+    "slim/slim": "^4.0",
+    "juliangut/doctrine-manager-builder": "2.x"
   },
   "require-dev": {
-    "brainmaestro/composer-git-hooks": "^2.1",
-    "doctrine/orm": "^2.4",
-    "doctrine/mongodb-odm": "^1.1",
-    "doctrine/couchdb-odm": "dev-master",
-    "friendsofphp/php-cs-fixer": "^1.0",
-    "phpmd/phpmd": "^2.0",
-    "phpunit/phpunit": "^4.5|^5.0",
-    "phpunit/phpunit-mock-objects": "^3.2",
-    "sebastian/phpcpd": "^2.0",
-    "squizlabs/php_codesniffer": "^2.0"
+    "ext-mongodb": "*",
+    "ext-pdo": "*",
+    "doctrine/orm": "^2.13",
+    "doctrine/mongodb-odm": "^2.3",
+    "infection/infection": "~0.25|~0.27",
+    "juliangut/easy-coding-standard-config": "^1.13",
+    "juliangut/phpstan-config": "^1.1",
+    "overtrue/phplint": "^9.0",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "phpmd/phpmd": "^2.14",
+    "phpunit/phpunit": "^9.6.13|^10.4",
+    "povils/phpmnd": "^3.2",
+    "roave/security-advisories": "dev-master"
   },
   "suggest": {
-    "doctrine/orm": "^2.4",
-    "doctrine/mongodb-odm": "^1.1",
-    "doctrine/couchdb-odm": "dev-master"
+    "doctrine/orm": "^2.13",
+    "doctrine/mongodb-odm": "^2.3"
   },
   "autoload": {
     "psr-4": {
@@ -55,44 +57,13 @@
       "Jgut\\Slim\\Doctrine\\Tests\\": "tests/Doctrine/"
     }
   },
-  "bin": [
-  ],
   "config": {
     "preferred-install": "dist",
-    "sort-packages": true
-  },
-  "scripts": {
-    "cghooks": "cghooks",
-    "post-install-cmd": "cghooks add --ignore-lock",
-    "post-update-cmd": "cghooks update",
-    "php-lint": "php -l src && php -l tests",
-    "phpcs": "phpcs --standard=PSR2 src tests",
-    "phpcs-lint": "php-cs-fixer fix --dry-run --verbose",
-    "phpcpd": "phpcpd src",
-    "phpmd": "phpmd src text unusedcode,naming,design,controversial,codesize",
-    "phpunit": "phpunit",
-    "phpunit-coverage": "phpunit --coverage-html build/coverage",
-    "phpunit-clover": "phpunit --coverage-clover build/logs/clover.xml",
-    "qa": [
-      "@php-lint",
-      "@phpcs",
-      "@phpcs-lint",
-      "@phpcpd",
-      "@phpmd"
-    ],
-    "reports": [
-      "@phpunit-coverage"
-    ],
-    "fix": "php-cs-fixer fix --verbose",
-    "security": "composer outdated",
-    "test": [
-      "@php-lint",
-      "@phpunit"
-    ]
-  },
-  "extra": {
-    "hooks": {
-      "pre-commit": "composer qa && composer phpunit"
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "infection/extension-installer": true,
+      "phpstan/extension-installer": true
     }
   }
 }

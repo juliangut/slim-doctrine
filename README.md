@@ -1,24 +1,13 @@
-[![PHP version](https://img.shields.io/badge/PHP-%3E%3D5.6-8892BF.svg?style=flat-square)](http://php.net)
+[![PHP version](https://img.shields.io/badge/PHP-%3E%3D8.0-8892BF.svg?style=flat-square)](http://php.net)
 [![Latest Version](https://img.shields.io/packagist/v/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 [![License](https://img.shields.io/github/license/juliangut/slim-doctrine.svg?style=flat-square)](https://github.com/juliangut/slim-doctrine/blob/master/LICENSE)
-
-[![Build Status](https://img.shields.io/travis/juliangut/slim-doctrine.svg?style=flat-square)](https://travis-ci.org/juliangut/slim-doctrine)
-[![Style Check](https://styleci.io/repos/42014429/shield)](https://styleci.io/repos/42014429)
-[![Code Quality](https://img.shields.io/scrutinizer/g/juliangut/slim-doctrine.svg?style=flat-square)](https://scrutinizer-ci.com/g/juliangut/slim-doctrine)
-[![Code Coverage](https://img.shields.io/coveralls/juliangut/slim-doctrine.svg?style=flat-square)](https://coveralls.io/github/juliangut/slim-doctrine)
 
 [![Total Downloads](https://img.shields.io/packagist/dt/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 [![Monthly Downloads](https://img.shields.io/packagist/dm/juliangut/slim-doctrine.svg?style=flat-square)](https://packagist.org/packages/juliangut/slim-doctrine)
 
 # Slim integration with Doctrine managers
 
-Easy Slim framework integration with Doctrine's Entity Manager, MongoDB Document Manager and CouchDB Document Manager.
-
-## Important note
-
-The latest version of slim-doctrine is focused only on Slim framework and Doctrine integration, and thus using the manager builders as stand alone is not possible.
-
-That same functionality can be achieved by using [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which is not tied to Slim framework.
+Easy Slim framework integration with Doctrine's Entity Manager and/or MongoDB Document Manager.
 
 ## Installation
 
@@ -26,6 +15,18 @@ Best way to install is using [Composer](https://getcomposer.org/):
 
 ```
 composer require juliangut/slim-doctrine
+```
+
+#### Using ORM
+
+```
+composer require doctrime/orm:^2.13
+```
+
+#### Using MongoDB ODM
+
+```
+composer require doctrine/mongodb-odm:^2.3
 ```
 
 Then require_once the autoload file:
@@ -36,27 +37,21 @@ require_once './vendor/autoload.php';
 
 ## Configuration
 
-Each kind of manager has its configurations stored on a key in the settings array
+Each kind of manager should have its configurations stored on a key in the array of settings
  
-* `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY` ("entity_manager") for `ORM`
-* `ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY` ("mongodb_document_manager") for `MongoDB ODM`
-* `ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY` ("couchdb_document_manager") for `CouchDB ODM`
+* "entityManager" for relational managers
+* "documentManager" for MongoDB managers
 
 ```php
 [
-    ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
+    'entityManager' => [
         'manager1_name' => <relational_manager_builder_configuration>,
         'manager2_name' => <relational_manager_builder_configuration>,
         ...
     ],
-    ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
+    'documentManager' => [
         'manager3_name' => <mongodb_manager_builder_configuration>,
         'manager4_name' => <mongodb_manager_builder_configuration>,
-        ...
-    ],
-    ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY => [
-        'manager5_name' => <couchdb_manager_builder_configuration>,
-        'manager6_name' => <couchdb_manager_builder_configuration>,
         ...
     ],
 ]
@@ -64,29 +59,32 @@ Each kind of manager has its configurations stored on a key in the settings arra
 
 If a manager is not given a name then a default one will be used:
 
-* `ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_NAME` ("entityManager) for `ORM`
-* `ManagerBuilder::DEFAULT_MONGODB_MANAGER_NAME` ("mongoDocumentManager") for `MongoDB ODM`
-* `ManagerBuilder::DEFAULT_COUCHDB_MANAGER_NAME` ("couchDocumentManager") for `CouchDB ODM`
+* "entityManager" for relational managers
+* "documentManager" for MongoDB managers
 
 ### Options
 
-ManagerBuilder's default keys and manager names can be modified providing constructor with an options array to change any of them
+ManagerBuilder's default keys and names can be modified at constructor with an options array or calling the corresponding method
 
 ```php
 $options = [
-    ManagerBuilder::RELATIONAL_MANAGER_KEY => 'entity_manager',
-    ManagerBuilder::MONGODB_MANAGER_KEY => 'mongodb_document_manager',
-    ManagerBuilder::COUCHDB_MANAGER_KEY => 'couchdb_document_manager',
-    ManagerBuilder::RELATIONAL_MANAGER_NAME => 'entityManager',
-    ManagerBuilder::MONGODB_MANAGER_NAME => 'mongoDocumentManager',
-    ManagerBuilder::COUCHDB_MANAGER_NAME => 'couchDocumentManager',
+    'relationalManagerKey' => 'orm',
+    'defaultRelationalManagerName' => 'entity_manager',
+    'mongoDBManagerKey' => 'odm',
+    'defaultMongoManagerName' => 'document_manager',
 ];
+
 $managerBuilder = new ManagerBuilder($options);
+
+$managerBuilder->setRelationalManagerKey('orm');
+$managerBuilder->setDefaultRelationalManagerName('entity_manager');
+$managerBuilder->setMongoDBManagerKey('odm');
+$managerBuilder->setDefaultRelationalManagerName('document_manager');
 ```
 
 ### Manager builders
 
-In order to configure the different Doctrine manager builders head to [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) which is used in this package.
+In order to configure the different Doctrine manager builders head to [juliangut/doctrine-manager-builder](https://github.com/juliangut/doctrine-manager-builder) to review manager configurations.
 
 ## Usage
 
@@ -96,107 +94,76 @@ Register managers in the DI container as any other service.
 use Jgut\Slim\Doctrine\ManagerBuilder;
 use Slim\App;
 
-// Loaded from a file
-$settings = [
-    'my_custom_key' => [
-        'annotation_autoloaders' => ['class_exists'],
-        'connection' => [
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
+// Probably loaded from a file
+$managerSettings = [
+    'orm' => [
+        'mainManager' => [
+            'connection' => [
+                'driver' => 'pdo_mysql',
+                'user' => 'db_user',
+                'password' => 'db_password',
+                'host' => 'localhost',
+                'dbname' => 'db_name',
+            ],
+            'metadataMapping' => [
+                [
+                    'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                    'path' => 'path/to/relational/mappings',
+                ],
+            ],
         ],
-        'metadata_mapping' => [
-            [
-                'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                'path' => 'path/to/annotation/mappings',
+    ],
+    'odm' => [
+        'auxManager' => [
+            'client' => [
+                'uri' => 'mongodb://localhost:27017'
+            ],
+            'metadataMapping' => [
+                [
+                    'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                    'path' => 'path/to/mongodb/mappings',
+                ],
             ],
         ],
     ],
 ];
 
-$managerBuilder = new ManagerBuilder([ManagerBuilder::RELATIONAL_MANAGER_KEY => 'my_custom_key']);
-$managerBuilder->loadSettings($settings);
+$managerBuilder = new ManagerBuilder([
+    'relationalManagerKey' => 'orm',
+    'mongoDBManagerKey' => 'odm',
+]);
+
+// Load all managers at once
+$managerBuilder->registerManagers($managerSettings);
+
+// Or load independently
+$managerBuilder->registerRelationalManagers($managerSettings['orm']);
+$managerBuilder->registerMongoDbDocumentManagers($managerSettings['odm']);
 
 // Create Slim app and fetch DI Container
 $app = new App();
-$container = $app->getContainer();
 
-// Register every manager in the container
+// Register managers into the container
+$container = $app->getContainer();
 foreach ($managerBuilder->getManagers() as $name => $manager) {
     $container[$name] = $manager;
 }
 
 // Use managers
 $app->get('/', function () {
-    $this->entityManager->persist(new \Entity);
-    $this->entityManager->flush();
+    $this->mainManager->persist(new \Entity);
+    $this->mainManager->flush();
+
+    $this->auxManager->persist(new \Document);
+    $this->auxManager->flush();
 });
 ```
 
-Register manager builder in the DI container to delegate managers creation.
-
-```php
-use Jgut\Slim\Doctrine\ManagerBuilder;
-use Interop\Container\ContainerInterface;
-use Slim\App;
-
-// Probably loaded from a file...
-$settings = [
-    'settings.doctrineManagers' => [
-        ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
-            'mainDocumentManager' => [
-                'connection' => [
-                    'server' => 'mongodb://localhost:27017',
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => 'path/to/annotation/mappings',
-                    ],
-                ],
-            ],
-            'secondaryDocumentManager' => [
-                'annotation_autoloaders' => ['class_exists'],
-                'connection' => [
-                    'server' => 'mongodb://localhost:27017',
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => 'path/to/annotation/mappings',
-                    ],
-                ],
-            ],
-        ],
-    ],
-];
-
-// Create Slim app and fetch DI Container
-$app = new App($settings);
-$container = $app->getContainer();
-
-// Register manager builder fetching settings from container
-$container['manager_builder'] => function (ContainerInterface $container) {
-    return (new ManagerBuilder())->loadSettings($container->get('settings.doctrineManagers'));
-};
-
-// Register managers by pulling them from the builder
-$container['mainDocumentManager'] => function (ContainerInterface $container) {
-    return $container->get('manager_builder')->getManager('mainDocumentManager');
-};
-$container['secondaryDocumentManager'] => function (ContainerInterface $container) {
-    return $container->get('manager_builder')->getManager('secondaryDocumentManager');
-};
-
-// Use managers
-$app->get('/', function () {
-    $this->mainDocumentManager->persist(new \Document);
-    $this->mainDocumentManager->flush();
-});
-```
+If you are using another kind of container such as PHP-DI it'd be a good idea to register managers as independent resolvable services
 
 ## CLI Application builder
 
-`doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does but it does not need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager name.
+`doctrine-manager` is a CLI tool that is installed with this package. It provides the same functionality that Doctrine's ORM `doctrine` CLI tool does, but it does not need ORM to be installed. Additionally `doctrine-manager` allows you to have numerous managers configured thanks to prepending manager names.
 
 The way to using `doctrine-manager` is the same as with `doctrine` by creating a `cli-config.php` file returning a Symfony\Component\Console\Application
 
@@ -207,10 +174,19 @@ use Jgut\Slim\Doctrine\ManagerBuilder;
 
 $settings = require 'configurations.php';
 
-$managerBuilder = (new ManagerBuilder())->loadSettings($settings);
+$managerBuilder = (new ManagerBuilder())->registerManagers($settings);
 
 return $managerBuilder->getCLIApplication();
 ```
+
+## Migrating from 2.x
+
+* Minimum PHP version is now 8.0
+* Minimum doctrine/orm is now 2.13
+* Minimum doctrine/mongodb-odm is now 2.3
+* Configuration names have changed to camelCase
+* `loadSettings` method has been renamed to `registerManagers`
+* Annotation mapping is deprecated, migrate to Attribute mapping
 
 ## Contributing
 

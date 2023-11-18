@@ -1,113 +1,66 @@
 <?php
 
 /*
- * Slim3 Doctrine integration (https://github.com/juliangut/slim-doctrine).
+ * (c) 2016-2023 Julián Gutiérrez <juliangut@gmail.com>
  *
  * @license BSD-3-Clause
  * @link https://github.com/juliangut/slim-doctrine
- * @author Julián Gutiérrez <juliangut@gmail.com>
  */
+
+declare(strict_types=1);
 
 namespace Jgut\Slim\Doctrine\Tests;
 
-use Doctrine\ODM\CouchDB\DocumentManager as CouchDBDocumentManager;
-use Doctrine\ODM\MongoDB\DocumentManager as MongoDBDocumentManager;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
+use InvalidArgumentException;
 use Jgut\Doctrine\ManagerBuilder\AbstractManagerBuilder;
 use Jgut\Slim\Doctrine\ManagerBuilder;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
- * Manager builder tests.
+ * @internal
  */
-class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
+class ManagerBuilderTest extends TestCase
 {
-    public function testSingleManagers()
+    public function testInvalidConfigurationOption(): void
     {
-        $settings = [
-            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
-                'connection' => [
-                    'driver' => 'pdo_sqlite',
-                    'memory' => true,
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => __DIR__,
-                    ],
-                ],
-            ],
-            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
-                'connection' => [
-                    'server' => 'mongodb://localhost:27017',
-                    'options' => ['connect' => false],
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => __DIR__,
-                    ],
-                ],
-            ],
-            ManagerBuilder::DEFAULT_COUCHDB_MANAGER_KEY => [
-                'connection' => [
-                    'host' => 'localhost',
-                    'dbname' => 'doctrine',
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => __DIR__,
-                    ],
-                ],
-            ],
-        ];
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown configuration "option".');
 
-        $managerBuilder = (new ManagerBuilder())->loadSettings($settings);
-
-        $managers = $managerBuilder->getManagers();
-
-        self::assertCount(3, $managers);
-
-        self::assertInstanceOf(EntityManager::class, $managerBuilder->getManager('entityManager'));
-        self::assertEquals($managers['entityManager'], $managerBuilder->getManager('entityManager'));
-
-        self::assertInstanceOf(MongoDBDocumentManager::class, $managerBuilder->getManager('mongoDocumentManager'));
-        self::assertEquals($managers['mongoDocumentManager'], $managerBuilder->getManager('mongoDocumentManager'));
-
-        self::assertInstanceOf(CouchDBDocumentManager::class, $managerBuilder->getManager('couchDocumentManager'));
-        self::assertEquals($managers['couchDocumentManager'], $managerBuilder->getManager('couchDocumentManager'));
+        new ManagerBuilder(['option' => 'value']);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage "managerOne" manager builder is already registered
-     */
-    public function testDuplicatedNamedManager()
+    public function testDuplicatedNamedManager(): void
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('"managerOne" manager builder is already registered.');
+
         $settings = [
-            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
+            'entity_manager' => [
                 'managerOne' => [
                     'connection' => [
                         'driver' => 'pdo_sqlite',
                         'memory' => true,
                     ],
-                    'metadata_mapping' => [
+                    'metadataMapping' => [
                         [
-                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
                             'path' => __DIR__,
                         ],
                     ],
                 ],
             ],
-            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
+            'document_manager' => [
                 'managerOne' => [
-                    'connection' => [
-                        'server' => 'mongodb://localhost:27017',
-                        'options' => ['connect' => false],
+                    'client' => [
+                        'uri' => 'mongodb://localhost:27017',
+                        'driverOptions' => ['connect' => false],
                     ],
-                    'metadata_mapping' => [
+                    'metadataMapping' => [
                         [
-                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
                             'path' => __DIR__,
                         ],
                     ],
@@ -115,77 +68,152 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-        (new ManagerBuilder())->loadSettings($settings);
+        (new ManagerBuilder())->registerManagers($settings);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage "noOnesManager" is not a registered manager
-     */
-    public function testNoRegisteredManager()
+    public function testUnnamedBuilder(): void
     {
-        self::assertCount(0, (new ManagerBuilder())->getManagers());
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Only named manager builders allowed.');
 
-        $settings = [
-            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
-                'connection' => [
-                    'driver' => 'pdo_sqlite',
-                    'memory' => true,
-                ],
-                'metadata_mapping' => [
-                    [
-                        'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
-                        'path' => __DIR__,
-                    ],
-                ],
-            ],
-        ];
-
-        $managerBuilder = (new ManagerBuilder())->loadSettings($settings);
-
-        $managerBuilder->getManager('noOnesManager');
-    }
-
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Only named manager builders allowed
-     */
-    public function testUnnamedBuilder()
-    {
         $builder = $this->getMockBuilder(AbstractManagerBuilder::class)
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
-        /* @var AbstractManagerBuilder $builder */
 
         (new ManagerBuilder())->addBuilder($builder);
     }
 
-    public function testCLIApplication()
+    public function testDefaultManagers(): void
     {
         $settings = [
-            ManagerBuilder::DEFAULT_RELATIONAL_MANAGER_KEY => [
-                'managerOne' => [
+            'entity_manager' => [
+                'connection' => [
+                    'driver' => 'pdo_sqlite',
+                    'memory' => true,
+                ],
+                'metadataMapping' => [
+                    [
+                        'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                        'path' => __DIR__,
+                    ],
+                ],
+            ],
+            'document_manager' => [
+                'client' => [
+                    'uri' => 'mongodb://localhost:27017',
+                    'driverOptions' => ['connect' => false],
+                ],
+                'metadataMapping' => [
+                    [
+                        'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                        'path' => __DIR__,
+                    ],
+                ],
+            ],
+        ];
+
+        $managerBuilder = new ManagerBuilder();
+        $managerBuilder->registerManagers($settings);
+
+        $managers = $managerBuilder->getManagers();
+
+        static::assertCount(2, $managers);
+
+        static::assertInstanceOf(EntityManager::class, $managerBuilder->getManager('entityManager'));
+        static::assertEquals($managers['entityManager'], $managerBuilder->getManager('entityManager'));
+
+        static::assertInstanceOf(DocumentManager::class, $managerBuilder->getManager('documentManager'));
+        static::assertEquals($managers['documentManager'], $managerBuilder->getManager('documentManager'));
+    }
+
+    public function testNotRegisteredNamedManager(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('"customManager" is not a registered manager');
+
+        static::assertCount(0, (new ManagerBuilder())->getManagers());
+
+        $settings = [
+            [
+                'connection' => [
+                    'driver' => 'pdo_sqlite',
+                    'memory' => true,
+                ],
+                'metadataMapping' => [
+                    [
+                        'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                        'path' => __DIR__,
+                    ],
+                ],
+            ],
+        ];
+
+        $managerBuilder = new ManagerBuilder();
+        $managerBuilder->registerRelationalManagers($settings);
+
+        $managers = $managerBuilder->getManagers();
+
+        static::assertCount(1, $managers);
+
+        $managerBuilder->getManager('customManager');
+    }
+
+    public function testRegisteredNamedManager(): void
+    {
+        static::assertCount(0, (new ManagerBuilder())->getManagers());
+
+        $settings = [
+            'customManager' => [
+                'client' => [
+                    'uri' => 'mongodb://localhost',
+                    'driverOptions' => ['connect' => false],
+                ],
+                'metadataMapping' => [
+                    [
+                        'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                        'path' => __DIR__,
+                    ],
+                ],
+            ],
+        ];
+
+        $managerBuilder = new ManagerBuilder();
+        $managerBuilder->registerMongoDbDocumentManagers($settings);
+
+        $managers = $managerBuilder->getManagers();
+
+        static::assertCount(1, $managers);
+
+        static::assertInstanceOf(DocumentManager::class, $managerBuilder->getManager('customManager'));
+        static::assertEquals($managers['customManager'], $managerBuilder->getManager('customManager'));
+    }
+
+    public function testCommandLineApplication(): void
+    {
+        $settings = [
+            'entity_manager' => [
+                'primary' => [
                     'connection' => [
                         'driver' => 'pdo_sqlite',
                         'memory' => true,
                     ],
-                    'metadata_mapping' => [
+                    'metadataMapping' => [
                         [
-                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
                             'path' => __DIR__,
                         ],
                     ],
                 ],
             ],
-            ManagerBuilder::DEFAULT_MONGODB_MANAGER_KEY => [
-                'managerTwo' => [
-                    'connection' => [
-                        'server' => 'mongodb://localhost:27017',
-                        'options' => ['connect' => false],
+            'document_manager' => [
+                'secondary' => [
+                    'client' => [
+                        'uri' => 'mongodb://localhost:27017',
+                        'driverOptions' => ['connect' => false],
                     ],
-                    'metadata_mapping' => [
+                    'metadataMapping' => [
                         [
-                            'type' => ManagerBuilder::METADATA_MAPPING_ANNOTATION,
+                            'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
                             'path' => __DIR__,
                         ],
                     ],
@@ -193,11 +221,13 @@ class ManagerBuilderTest extends \PHPUnit_Framework_TestCase
             ],
         ];
 
-        $managerBuilder = (new ManagerBuilder())->loadSettings($settings);
+        $managerBuilder = new ManagerBuilder();
+        $managerBuilder->registerManagers($settings);
 
-        $application = $managerBuilder->getCLIApplication();
+        $application = $managerBuilder->getCliApplication();
 
-        self::assertTrue($application->has('dbal:managerOne:run-sql'));
-        self::assertTrue($application->has('odm:managerTwo:query'));
+        static::assertTrue($application->has('dbal-primary:run-sql'));
+        static::assertTrue($application->has('orm-primary:schema-tool:create'));
+        static::assertTrue($application->has('odm-secondary:query'));
     }
 }

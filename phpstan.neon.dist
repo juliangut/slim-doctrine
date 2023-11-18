@@ -1,0 +1,9 @@
+includes:
+  - %rootDir%/../../juliangut/phpstan-config/phpstan-phpunit.neon
+
+parameters:
+  level: max
+  parallel:
+    maximumNumberOfProcesses: 7
+  paths:
+    - src
