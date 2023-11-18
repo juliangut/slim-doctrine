@@ -1,0 +1,68 @@
+name: Code Analysis
+
+on:
+  pull_request: null
+  push:
+    branches:
+      - master
+
+env:
+  COMPOSER_ROOT_VERSION: dev-master
+
+jobs:
+  prepare_env:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: composer-versions-matrix
+        uses: WyriHaximus/github-action-composer-php-versions-in-range@v1
+
+    outputs:
+      php: ${{ steps.composer-versions-matrix.outputs.version }}
+      extensions: ${{ steps.composer-versions-matrix.outputs.extensions }}
+
+  code_analysis:
+    needs: prepare_env
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ${{ fromJson(needs.prepare_env.outputs.php) }}
+
+    name: Analyse on PHP ${{ matrix.php }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ join(fromJson(needs.prepare_env.outputs.extensions), ', ') }}
+          coverage: none
+
+      - name: Composer install
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: "--prefer-dist"
+
+      - name: Run PHP linting
+        run: make lint-php
+
+      - name: Run check style
+        run: make lint-ecs
+
+      - name: Run mess detection
+        run: make qa-phpmd
+
+      - name: Run magic number detection
+        run: make qa-phpmnd
+
+      - name: Run PHP compatibility
+        run: make qa-compatibility
+
+      - name: Run static analysis
+        run: make qa-phpstan
