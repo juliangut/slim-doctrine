@@ -178,18 +178,27 @@ class ManagerBuilder extends AbstractBuilderCollection
         return $builder->getManager();
     }
 
-    public function getCliApplication(): Application
+    public function getCliApplication(?string $commandPrefix = null): Application
     {
         $application = new Application('Doctrine Manager Builder Command Line Interface');
         $application->setAutoExit(true);
         $application->setCatchExceptions(true);
 
+        $this->addCliApplicationCommands($application, $commandPrefix);
+
+        return $application;
+    }
+
+    public function addCliApplicationCommands(Application $application, ?string $commandPrefix = null): void
+    {
         foreach ($this->builders as $builder) {
             foreach ($builder->getConsoleCommands() as $command) {
+                if ($commandPrefix !== null) {
+                    $command->setName(sprintf('%s:%s', rtrim($commandPrefix, ':'), $command->getName()));
+                }
+
                 $application->add($command);
             }
         }
-
-        return $application;
     }
 }

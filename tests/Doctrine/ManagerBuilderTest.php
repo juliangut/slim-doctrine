@@ -224,10 +224,10 @@ class ManagerBuilderTest extends TestCase
         $managerBuilder = new ManagerBuilder();
         $managerBuilder->registerManagers($settings);
 
-        $application = $managerBuilder->getCliApplication();
+        $application = $managerBuilder->getCliApplication('custom');
 
-        static::assertTrue($application->has('dbal-primary:run-sql'));
-        static::assertTrue($application->has('orm-primary:schema-tool:create'));
-        static::assertTrue($application->has('odm-secondary:query'));
+        static::assertTrue($application->has('custom:dbal-primary:run-sql'));
+        static::assertTrue($application->has('custom:orm-primary:schema-tool:create'));
+        static::assertTrue($application->has('custom:odm-secondary:query'));
     }
 }
