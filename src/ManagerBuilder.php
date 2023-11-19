@@ -96,53 +96,65 @@ class ManagerBuilder extends AbstractBuilderCollection
     }
 
     /**
-     * @param array<int|string, array<string, mixed>>|array<string, mixed> $settings
+     * @param array<int|string, array<string, mixed>>|array<string, mixed> $managersSettings
      *
      * @throws InvalidArgumentException
      */
-    public function registerRelationalManagers(array $settings): void
+    public function registerRelationalManagers(array $managersSettings): void
     {
-        if (\array_key_exists('connection', $settings)) {
-            $settings = [$settings];
+        if (\array_key_exists('connection', $managersSettings)) {
+            $managersSettings = [$managersSettings];
         }
 
-        /** @var array<int|string, array<string, mixed>> $settings */
-        foreach ($settings as $name => $config) {
-            $managerName = $config['name'] ?? null;
-            if (\is_string($name)) {
-                $managerName = $name;
-            } elseif ($managerName === null) {
-                $managerName = $this->defaultRelationalManagerName;
+        /** @var array<int|string, array<string, mixed>> $managersSettings */
+        foreach ($managersSettings as $name => $managerSettings) {
+            if (\is_string($name) && $name !== '') {
+                $managerSettings['name'] = $name;
             }
-            $config['name'] = $managerName;
 
-            $this->addBuilder(new RelationalBuilder($config));
+            $this->registerRelationalManager($managerSettings);
         }
     }
 
     /**
-     * @param array<int|string, array<string, mixed>>|array<string, mixed> $settings
+     * @param array<string, mixed> $managerSettings
+     */
+    public function registerRelationalManager(array $managerSettings): void
+    {
+        $managerSettings['name'] ??= $this->defaultRelationalManagerName;
+
+        $this->addBuilder(new RelationalBuilder($managerSettings));
+    }
+
+    /**
+     * @param array<int|string, array<string, mixed>>|array<string, mixed> $managersSettings
      *
      * @throws InvalidArgumentException
      */
-    public function registerMongoDbDocumentManagers(array $settings): void
+    public function registerMongoDbDocumentManagers(array $managersSettings): void
     {
-        if (\array_key_exists('client', $settings)) {
-            $settings = [$settings];
+        if (\array_key_exists('client', $managersSettings)) {
+            $managersSettings = [$managersSettings];
         }
 
-        /** @var array<int|string, array<string, mixed>> $settings */
-        foreach ($settings as $name => $config) {
-            $managerName = $config['name'] ?? null;
-            if (\is_string($name)) {
-                $managerName = $name;
-            } elseif ($managerName === null) {
-                $managerName = $this->defaultMongoDbManagerName;
+        /** @var array<int|string, array<string, mixed>> $managersSettings */
+        foreach ($managersSettings as $name => $managerSettings) {
+            if (\is_string($name) && $name !== '') {
+                $managerSettings['name'] = $name;
             }
-            $config['name'] = $managerName;
 
-            $this->addBuilder(new MongoDBBuilder($config));
+            $this->registerMongoDbDocumentManager($managerSettings);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $managerSettings
+     */
+    public function registerMongoDbDocumentManager(array $managerSettings): void
+    {
+        $managerSettings['name'] ??= $this->defaultMongoDbManagerName;
+
+        $this->addBuilder(new MongoDBBuilder($managerSettings));
     }
 
     /**
