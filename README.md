@@ -7,7 +7,7 @@
 
 # Slim integration with Doctrine managers
 
-Easy Slim framework integration with Doctrine's Entity Manager and/or MongoDB Document Manager.
+Easy Slim framework integration with Doctrine's ORM Entity Manager and MongoDB Document Manager.
 
 ## Installation
 
@@ -17,13 +17,19 @@ Best way to install is using [Composer](https://getcomposer.org/):
 composer require juliangut/slim-doctrine
 ```
 
-#### Using ORM
+### Using ORM
 
 ```
 composer require doctrime/orm:^2.13
 ```
 
-#### Using MongoDB ODM
+#### With Doctrine Migrations
+
+```
+composer require doctrime/migrations:^3.5
+```
+
+### Using MongoDB ODM
 
 ```
 composer require doctrine/mongodb-odm:^2.3
@@ -111,6 +117,11 @@ $managerSettings = [
                     'path' => 'path/to/relational/mappings',
                 ],
             ],
+            'migrationsConfiguration' => [
+                'migrations_paths' => [
+                    'App\Migrations' => __DIR__ . '/files/migrations',
+                ],
+            ],
         ],
     ],
     'odm' => [
@@ -133,10 +144,10 @@ $managerBuilder = new ManagerBuilder([
     'mongoDBManagerKey' => 'odm',
 ]);
 
-// Load all managers at once
+// Register all managers at once
 $managerBuilder->registerManagers($managerSettings);
 
-// Or load independently
+// Or register independently
 $managerBuilder->registerRelationalManagers($managerSettings['orm']);
 $managerBuilder->registerMongoDbDocumentManagers($managerSettings['odm']);
 

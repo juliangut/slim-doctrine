@@ -192,7 +192,7 @@ class ManagerBuilderTest extends TestCase
     {
         $settings = [
             'entity_manager' => [
-                'primary' => [
+                'first' => [
                     'connection' => [
                         'driver' => 'pdo_sqlite',
                         'memory' => true,
@@ -204,9 +204,26 @@ class ManagerBuilderTest extends TestCase
                         ],
                     ],
                 ],
+                'second' => [
+                    'connection' => [
+                        'driver' => 'pdo_sqlite',
+                        'memory' => true,
+                    ],
+                    'metadataMapping' => [
+                        [
+                            'type' => ManagerBuilder::METADATA_MAPPING_ATTRIBUTE,
+                            'path' => __DIR__,
+                        ],
+                    ],
+                    'migrationsConfiguration' => [
+                        'migrations_paths' => [
+                            'App\Migrations' => __DIR__ . '/files/migrations',
+                        ],
+                    ],
+                ],
             ],
             'document_manager' => [
-                'secondary' => [
+                'third' => [
                     'client' => [
                         'uri' => 'mongodb://localhost:27017',
                         'driverOptions' => ['connect' => false],
@@ -226,8 +243,13 @@ class ManagerBuilderTest extends TestCase
 
         $application = $managerBuilder->getCliApplication('custom');
 
-        static::assertTrue($application->has('custom:dbal-primary:run-sql'));
-        static::assertTrue($application->has('custom:orm-primary:schema-tool:create'));
-        static::assertTrue($application->has('custom:odm-secondary:query'));
+        static::assertTrue($application->has('custom:dbal-first:run-sql'));
+        static::assertTrue($application->has('custom:orm-first:schema-tool:create'));
+
+        static::assertTrue($application->has('custom:dbal-second:run-sql'));
+        static::assertTrue($application->has('custom:orm-second:schema-tool:create'));
+        static::assertTrue($application->has('custom:migrations-second:status'));
+
+        static::assertTrue($application->has('custom:odm-third:query'));
     }
 }

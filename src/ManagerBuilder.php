@@ -17,6 +17,7 @@ use Jgut\Doctrine\ManagerBuilder\AbstractBuilderCollection;
 use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
+use Jgut\Doctrine\ManagerBuilder\RelationalMigrationsBuilder;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 
@@ -112,7 +113,9 @@ class ManagerBuilder extends AbstractBuilderCollection
                 $managerSettings['name'] = $name;
             }
 
-            $this->registerRelationalManager($managerSettings);
+            !\array_key_exists('migrationsConfiguration', $managerSettings)
+                ? $this->registerRelationalManager($managerSettings)
+                : $this->registerRelationalMigrationsManager($managerSettings);
         }
     }
 
@@ -124,6 +127,16 @@ class ManagerBuilder extends AbstractBuilderCollection
         $managerSettings['name'] ??= $this->defaultRelationalManagerName;
 
         $this->addBuilder(new RelationalBuilder($managerSettings));
+    }
+
+    /**
+     * @param array<string, mixed> $managerSettings
+     */
+    public function registerRelationalMigrationsManager(array $managerSettings): void
+    {
+        $managerSettings['name'] ??= $this->defaultRelationalManagerName;
+
+        $this->addBuilder(new RelationalMigrationsBuilder($managerSettings));
     }
 
     /**
