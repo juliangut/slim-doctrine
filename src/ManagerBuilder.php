@@ -18,10 +18,16 @@ use Jgut\Doctrine\ManagerBuilder\ManagerBuilder as Builder;
 use Jgut\Doctrine\ManagerBuilder\MongoDBBuilder;
 use Jgut\Doctrine\ManagerBuilder\RelationalBuilder;
 use Jgut\Doctrine\ManagerBuilder\RelationalMigrationsBuilder;
+use Jgut\Slim\Doctrine\Repository\MongoDbRepository;
+use Jgut\Slim\Doctrine\Repository\MongoDbRepositoryFactory;
+use Jgut\Slim\Doctrine\Repository\RelationalRepository;
+use Jgut\Slim\Doctrine\Repository\RelationalRepositoryFactory;
+use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 
 /**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ManagerBuilder extends AbstractBuilderCollection
@@ -39,6 +45,8 @@ class ManagerBuilder extends AbstractBuilderCollection
     private string $mongoDbManagerKey = 'document_manager';
 
     private string $defaultMongoDbManagerName = 'documentManager';
+
+    private ?ContainerInterface $container = null;
 
     /**
      * @param array<string, mixed> $options
@@ -78,6 +86,11 @@ class ManagerBuilder extends AbstractBuilderCollection
     public function setDefaultMongoDbManagerName(string $defaultMongoDbManagerName): void
     {
         $this->defaultMongoDbManagerName = $defaultMongoDbManagerName;
+    }
+
+    public function setContainer(ContainerInterface $container): void
+    {
+        $this->container = $container;
     }
 
     /**
@@ -125,6 +138,8 @@ class ManagerBuilder extends AbstractBuilderCollection
     public function registerRelationalManager(array $managerSettings): void
     {
         $managerSettings['name'] ??= $this->defaultRelationalManagerName;
+        $managerSettings['repositoryFactory'] ??= new RelationalRepositoryFactory($this->container);
+        $managerSettings['defaultRepositoryClass'] ??= RelationalRepository::class;
 
         $this->addBuilder(new RelationalBuilder($managerSettings));
     }
@@ -135,6 +150,8 @@ class ManagerBuilder extends AbstractBuilderCollection
     public function registerRelationalMigrationsManager(array $managerSettings): void
     {
         $managerSettings['name'] ??= $this->defaultRelationalManagerName;
+        $managerSettings['repositoryFactory'] ??= new RelationalRepositoryFactory($this->container);
+        $managerSettings['defaultRepositoryClass'] ??= RelationalRepository::class;
 
         $this->addBuilder(new RelationalMigrationsBuilder($managerSettings));
     }
@@ -166,6 +183,8 @@ class ManagerBuilder extends AbstractBuilderCollection
     public function registerMongoDbDocumentManager(array $managerSettings): void
     {
         $managerSettings['name'] ??= $this->defaultMongoDbManagerName;
+        $managerSettings['repositoryFactory'] ??= new MongoDbRepositoryFactory($this->container);
+        $managerSettings['defaultRepositoryClass'] ??= MongoDbRepository::class;
 
         $this->addBuilder(new MongoDBBuilder($managerSettings));
     }

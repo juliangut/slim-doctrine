@@ -7,3 +7,10 @@ parameters:
     maximumNumberOfProcesses: 7
   paths:
     - src
+  ignoreErrors:
+    - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\RelationalRepository::getManager\(\) should return Doctrine\\ORM\\EntityManager but returns Doctrine\\ORM\\EntityManagerInterface\.$/'
+      path: src/Repository/RelationalRepository.php
+    - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\RelationalRepositoryFactory::getRepository\(\) should return Doctrine\\ORM\\EntityRepository<T of object> but returns Doctrine\\ORM\\EntityRepository<object>\.$/'
+      path: src/Repository/RelationalRepositoryFactory.php
+    - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\MongoDbRepositoryFactory::getRepository\(\) should return Doctrine\\ODM\\MongoDB\\Repository\\DocumentRepository<T of object> but returns Doctrine\\ODM\\MongoDB\\Repository\\DocumentRepository<object>\.$/'
+      path: src/Repository/MongoDbRepositoryFactory.php

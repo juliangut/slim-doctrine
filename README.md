@@ -73,11 +73,17 @@ If a manager is not given a name then a default one will be used:
 ManagerBuilder's default keys and names can be modified at constructor with an options array or calling the corresponding method
 
 ```php
+use Psr\Container\ContainerInterface;
+
+// Implementation of ContainerInterface
+$container = '';
+
 $options = [
     'relationalManagerKey' => 'orm',
     'defaultRelationalManagerName' => 'entity_manager',
     'mongoDBManagerKey' => 'odm',
     'defaultMongoManagerName' => 'document_manager',
+    'container' => $container,
 ];
 
 $managerBuilder = new ManagerBuilder($options);
@@ -86,7 +92,10 @@ $managerBuilder->setRelationalManagerKey('orm');
 $managerBuilder->setDefaultRelationalManagerName('entity_manager');
 $managerBuilder->setMongoDBManagerKey('odm');
 $managerBuilder->setDefaultRelationalManagerName('document_manager');
+$managerBuilder->setContainer($container);
 ```
+
+When possible include in implementation of ContainerInterface as it'll be used for repository creation. See below
 
 ### Manager builders
 
@@ -98,7 +107,11 @@ Register managers in the DI container as any other service.
 
 ```php
 use Jgut\Slim\Doctrine\ManagerBuilder;
+use Psr\Container\ContainerInterface;
 use Slim\App;
+
+// Implementation of ContainerInterface
+$container = '';
 
 // Probably loaded from a file
 $managerSettings = [
@@ -142,6 +155,7 @@ $managerSettings = [
 $managerBuilder = new ManagerBuilder([
     'relationalManagerKey' => 'orm',
     'mongoDBManagerKey' => 'odm',
+    'container' =>> $container,
 ]);
 
 // Register all managers at once
@@ -171,6 +185,109 @@ $app->get('/', function () {
 ```
 
 If you are using another kind of container such as PHP-DI it'd be a good idea to register managers as independent resolvable services
+
+### Manager defaults
+
+Managers are automatically configured with custom repository factories (`Jgut\Slim\Doctrine\Repository\RelationalRepositoryFactory` and `Jgut\Slim\Doctrine\Repository\MongoDbRepositoryFactory`) which improves repository creation with the help of [PHP-DI/Invoker](https://github.com/PHP-DI/Invoker)
+
+Default repository will be `Jgut\Slim\Doctrine\Repository\RelationalRepository` or `Jgut\Slim\Doctrine\Repository\MongoDbRepository` which comes with several new methods, you can extend from them to use them
+
+#### Counting
+
+Perform object count with countAll and countBy with "magic" combinations as well
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$totalObjects = $repository->countAll();
+$activeObjects = $repository->countBy(['active' => true]);
+$activeObjects = $repository->countByActive(true);
+```
+
+#### Find or fail
+
+Same functionality as findBy, findOneBy and their "magic" combinations but throwing an exception if nothing is found
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$object = $repository->findByOrFail(['slug' => 'my_slug']);
+$object = $repository->findBySlugOrFail('my_slug');
+
+$object = $repository->findOneByOrFail(['slug' => 'my_slug']);
+$object = $repository->findOneBySlugOrFail('my_slug');
+```
+
+#### Creation
+
+##### getNew
+
+Creates a new empty object directly from repository.
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$newObject = $repository->getNew();
+```
+
+If your object needs constructor parameters override getNew method on your own repositories
+
+##### findOneByOrGetNew
+
+Returns an object based on criteria or a new object if none could not be found.
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$existingOrNewObject = $repository->findOneByOrGetNew(['slug' => 'my_slug']);
+$existingOrNewObject = $repository->findOneBySlugOrGetNew('my_slug');
+```
+
+#### Persisting
+
+Will persist the object into the manager.
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$repository->persist(new ObjectClass());
+```
+
+#### Removal
+
+##### remove
+
+In the same fashion as add this will remove the object.
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$repository->remove($repository->findById(1));
+```
+
+##### removeAll
+
+FindAll and then removes them all.
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$repository->removeAll();
+```
+
+##### removeBy and removeOneBy
+
+As their counterparts findBy and findOneBy but removing the objects instead of returning them
+
+```php
+$repository = $manager->getRepository(ObjectClass::class);
+
+$repository->removeBy(['active' => false]);
+$repository->removeByActive(false);
+
+$repository->removeOneBy(['active' => true]);
+$repository->removeOneByActive(true);
+```
 
 ## CLI Application builder
 
