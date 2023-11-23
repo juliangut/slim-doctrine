@@ -86,7 +86,7 @@ trait RepositoryBehaviour
      *
      * @throws BadMethodCallException
      */
-    private function callSupportingMethod(string $supportingMethod, string $fieldName, array $arguments): mixed
+    protected function callSupportingMethod(string $supportingMethod, string $fieldName, array $arguments): mixed
     {
         if ($this->inflector === null) {
             $this->inflector = InflectorFactory::create()->build();
@@ -182,6 +182,14 @@ trait RepositoryBehaviour
         return new $className();
     }
 
+    public function isObjectAttached(object $object): bool
+    {
+        $this->assertObjectsClass($object);
+
+        return $this->getManager()
+            ->contains($object);
+    }
+
     /**
      * @param object|iterable<object> $objects
      */
@@ -189,7 +197,7 @@ trait RepositoryBehaviour
     {
         $this->assertObjectsClass($objects);
 
-        $this->runManagerAction('persist', $objects, $flush);
+        $this->processManagerAction('persist', $objects, $flush);
     }
 
     /**
@@ -206,7 +214,7 @@ trait RepositoryBehaviour
             $this->assertObjectsClass($objects);
         }
 
-        $this->runManagerAction('remove', $objects, $flush);
+        $this->processManagerAction('remove', $objects, $flush);
     }
 
     public function removeAll(bool $flush = false): void
@@ -216,7 +224,7 @@ trait RepositoryBehaviour
             return;
         }
 
-        $this->runManagerAction('remove', $objects, $flush);
+        $this->processManagerAction('remove', $objects, $flush);
     }
 
     /**
@@ -229,7 +237,7 @@ trait RepositoryBehaviour
             return;
         }
 
-        $this->runManagerAction('remove', $objects, $flush);
+        $this->processManagerAction('remove', $objects, $flush);
     }
 
     /**
@@ -243,7 +251,7 @@ trait RepositoryBehaviour
             return;
         }
 
-        $this->runManagerAction('remove', $object, $flush);
+        $this->processManagerAction('remove', $object, $flush);
     }
 
     /**
@@ -253,7 +261,23 @@ trait RepositoryBehaviour
     {
         $this->assertObjectsClass($objects);
 
-        $this->runManagerAction('refresh', $objects, false);
+        $this->processManagerAction('refresh', $objects, false);
+    }
+
+    public function flush(): void
+    {
+        $this->getManager()
+            ->flush();
+    }
+
+    /**
+     * @param object|iterable<object> $objects
+     */
+    public function merge(object|iterable $objects): void
+    {
+        $this->assertObjectsClass($objects);
+
+        $this->processManagerAction('merge', $objects, false);
     }
 
     /**
@@ -263,21 +287,7 @@ trait RepositoryBehaviour
     {
         $this->assertObjectsClass($objects);
 
-        $this->runManagerAction('detach', $objects, false);
-    }
-
-    public function isManaged(object $object): bool
-    {
-        $this->assertObjectsClass($object);
-
-        return $this->getManager()
-            ->contains($object);
-    }
-
-    public function flush(): void
-    {
-        $this->getManager()
-            ->flush();
+        $this->processManagerAction('detach', $objects, false);
     }
 
     /**
@@ -313,7 +323,7 @@ trait RepositoryBehaviour
      *
      * @throws InvalidArgumentException
      */
-    private function runManagerAction(string $action, object|iterable $objects, bool $flush): void
+    private function processManagerAction(string $action, object|iterable $objects, bool $flush): void
     {
         /** @var callable $callable */
         $callable = [$this->getManager(), $action];

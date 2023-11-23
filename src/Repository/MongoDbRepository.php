@@ -15,6 +15,7 @@ use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Iterator\CachingIterator;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
+use Doctrine\ODM\MongoDB\UnitOfWork;
 
 /**
  * @template T of object
@@ -36,6 +37,36 @@ class MongoDbRepository extends DocumentRepository
             ->loadAll($criteria);
 
         return $iterator->count();
+    }
+
+    public function isObjectManaged(object $object): bool
+    {
+        return $this->getObjectState($object) === UnitOfWork::STATE_MANAGED;
+    }
+
+    public function isObjectNew(object $object): bool
+    {
+        return $this->getObjectState($object) === UnitOfWork::STATE_NEW;
+    }
+
+    public function isObjectDetached(object $object): bool
+    {
+        return $this->getObjectState($object) === UnitOfWork::STATE_DETACHED;
+    }
+
+    public function isObjectRemoved(object $object): bool
+    {
+        return $this->getObjectState($object) === UnitOfWork::STATE_REMOVED;
+    }
+
+    /**
+     * @return UnitOfWork::STATE_*
+     */
+    protected function getObjectState(object $object): int
+    {
+        return $this->getManager()
+            ->getUnitOfWork()
+            ->getDocumentState($object);
     }
 
     protected function getManager(): DocumentManager
