@@ -12,7 +12,7 @@ declare(strict_types=1);
 namespace Jgut\Slim\Doctrine\Repository;
 
 use Doctrine\Common\Util\ClassUtils;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\UnitOfWork;
 
@@ -56,7 +56,7 @@ class RelationalRepository extends EntityRepository
             ->getEntityState($object);
     }
 
-    protected function getManager(): EntityManager
+    protected function getManager(): EntityManagerInterface
     {
         return $this->getEntityManager();
     }

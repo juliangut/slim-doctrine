@@ -8,8 +8,6 @@ parameters:
   paths:
     - src
   ignoreErrors:
-    - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\RelationalRepository::getManager\(\) should return Doctrine\\ORM\\EntityManager but returns Doctrine\\ORM\\EntityManagerInterface\.$/'
-      path: src/Repository/RelationalRepository.php
     - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\MongoDbRepository::getObjectState\(\) should return 1\|2\|3\|4 but returns int\.$/'
       path: src/Repository/MongoDbRepository.php
     - message: '/^Method Jgut\\Slim\\Doctrine\\Repository\\RelationalRepositoryFactory::getRepository\(\) should return Doctrine\\ORM\\EntityRepository<T of object> but returns Doctrine\\ORM\\EntityRepository<object>\.$/'
