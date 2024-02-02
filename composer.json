@@ -29,7 +29,7 @@
     "juliangut/doctrine-manager-builder": "2.x",
     "php-di/invoker": "^2.3.3",
     "slim/slim": "^4.0",
-    "symfony/polyfill-php81": "^1.0"
+    "symfony/polyfill-php81": "^1.28"
   },
   "require-dev": {
     "ext-mongodb": "*",
@@ -38,7 +38,7 @@
     "doctrine/migrations": "^3.5",
     "doctrine/mongodb-odm": "^2.3",
     "infection/infection": "~0.25|~0.27",
-    "juliangut/easy-coding-standard-config": "^1.13",
+    "juliangut/easy-coding-standard-config": "^1.14",
     "juliangut/phpstan-config": "^1.1",
     "overtrue/phplint": "^9.0",
     "phpcompatibility/php-compatibility": "^9.3",
