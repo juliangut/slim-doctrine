@@ -36,7 +36,6 @@ class ManagerBuilder extends AbstractBuilderCollection
     public const METADATA_MAPPING_XML = Builder::METADATA_MAPPING_XML;
     public const METADATA_MAPPING_PHP = Builder::METADATA_MAPPING_PHP;
     public const METADATA_MAPPING_YAML = Builder::METADATA_MAPPING_YAML;
-    public const METADATA_MAPPING_ANNOTATION = Builder::METADATA_MAPPING_ANNOTATION;
 
     private string $relationalManagerKey = 'entity_manager';
 

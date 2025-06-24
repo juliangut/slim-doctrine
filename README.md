@@ -314,7 +314,7 @@ return $managerBuilder->getCLIApplication();
 * Minimum doctrine/mongodb-odm is now 2.3
 * Configuration names have changed to camelCase
 * `loadSettings` method has been renamed to `registerManagers`
-* Annotation mapping is deprecated, migrate to Attribute mapping
+* Annotation mapping has been removed
 
 ## Contributing
 
